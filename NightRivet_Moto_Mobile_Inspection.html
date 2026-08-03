@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>NightRivet Moto Inspection</title>
+<style>
+:root{
+  --bg:#0b0b0d;
+  --panel:#17171b;
+  --panel2:#202027;
+  --text:#f2f2f2;
+  --muted:#b6b6bd;
+  --red:#6f0b13;
+  --red2:#a91520;
+  --line:#34343c;
+  --green:#3b8f5d;
+  --yellow:#a67c17;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:linear-gradient(180deg,#08080a,#111116);
+  color:var(--text);
+}
+.wrap{max-width:900px;margin:auto;padding:16px}
+header{
+  text-align:center;
+  padding:18px 12px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#1b1b20,#111114);
+  border-radius:16px;
+  margin-bottom:14px;
+}
+h1{margin:0;font-size:28px;letter-spacing:.6px}
+.subtitle{color:var(--muted);margin-top:6px}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  margin:12px 0;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+input,textarea,select{
+  width:100%;
+  padding:11px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#101014;
+  color:var(--text);
+  font-size:16px;
+}
+textarea{min-height:76px;resize:vertical}
+.section-title{
+  margin:0 0 10px;
+  font-size:18px;
+  border-left:4px solid var(--red2);
+  padding-left:9px;
+}
+.item{
+  display:grid;
+  grid-template-columns:1.35fr repeat(3,.72fr) 1.45fr;
+  gap:6px;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid #2b2b32;
+}
+.item:last-child{border-bottom:0}
+.item .name{font-weight:700}
+.status{
+  display:flex;
+  gap:4px;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+}
+.status input{width:auto}
+.note input{font-size:14px;padding:8px}
+@media (max-width:760px){
+  .item{
+    grid-template-columns:1fr;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px;
+    margin:8px 0;
+  }
+  .status{justify-content:flex-start}
+}
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:16px 0 28px;
+}
+button{
+  flex:1 1 180px;
+  padding:13px 16px;
+  border:0;
+  border-radius:11px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+.primary{background:var(--red2);color:#fff}
+.secondary{background:#2b2b33;color:#fff}
+.success{background:var(--green);color:#fff}
+.warn{background:var(--yellow);color:#fff}
+.small{font-size:12px;color:var(--muted)}
+.history-item{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  margin:8px 0;
+}
+.history-title{font-weight:700}
+.badge{
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:12px;
+  margin-left:6px;
+  background:#2b2b33;
+}
+.hidden{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  .actions,.history,.small{display:none!important}
+  .card,header{border:1px solid #888;background:#fff}
+  input,textarea,select{border:1px solid #888;color:#000;background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>NightRivet Moto</h1>
+  <div class="subtitle">Motorcycle Multi-Point Inspection & Ride Ready Report</div>
+</header>
+
+<div class="card">
+  <h2 class="section-title">Bike Information</h2>
+  <div class="grid">
+    <div><label>Date</label><input id="date" type="date"></div>
+    <div><label>Technician</label><input id="technician" value="Sterling"></div>
+    <div><label>Owner / Customer</label><input id="owner" value="Sterling"></div>
+    <div><label>Mileage</label><input id="mileage" inputmode="numeric"></div>
+    <div><label>Year</label><input id="year" value="2024"></div>
+    <div><label>Make</label><input id="make" value="Kawasaki"></div>
+    <div><label>Model</label><input id="model" value="Z500 SE ABS"></div>
+    <div><label>Trip / Purpose</label><input id="purpose" value="Lake City to Tallahassee"></div>
+  </div>
+</div>
+
+<div id="sections"></div>
+
+<div class="card">
+  <h2 class="section-title">Final Assessment</h2>
+  <div class="grid">
+    <div>
+      <label>Overall Condition</label>
+      <select id="overall">
+        <option>Ride Ready</option>
+        <option>Service Recommended</option>
+        <option>Repair Before Riding</option>
+      </select>
+    </div>
+    <div>
+      <label>Ride Score</label>
+      <input id="score" type="number" min="0" max="100" placeholder="0-100">
+    </div>
+  </div>
+  <div style="margin-top:10px">
+    <label>Technician Recommendations</label>
+    <textarea id="recommendations"></textarea>
+  </div>
+  <div style="margin-top:10px">
+    <label>Next Service Due</label>
+    <input id="nextService">
+  </div>
+</div>
+
+<div class="actions">
+  <button class="success" onclick="saveInspection()">Save Inspection</button>
+  <button class="secondary" onclick="window.print()">Print / Save PDF</button>
+  <button class="warn" onclick="loadDraft()">Load Last Draft</button>
+  <button class="primary" onclick="clearForm()">New Blank Form</button>
+</div>
+
+<div class="card history">
+  <h2 class="section-title">Saved Inspections</h2>
+  <div id="historyList"></div>
+  <div class="small">Saved only on this device and browser. Use “Print / Save PDF” for a backup you can store in Google Drive.</div>
+</div>
+</div>
+
+<script>
+const inspectionSections = {
+  "Tires & Wheels":["Front tire pressure","Rear tire pressure","Tread condition","Tire damage or punctures","Wheel condition","Valve stems"],
+  "Chain & Drivetrain":["Chain condition","Chain slack","Chain lubrication","Front sprocket","Rear sprocket","Rear wheel alignment"],
+  "Brakes":["Front brake operation","Rear brake operation","Front pad thickness","Rear pad thickness","Front rotor","Rear rotor","Brake fluid level"],
+  "Fluids & Leaks":["Engine oil level","Coolant level","Visible fluid leaks"],
+  "Electrical":["Low beam","High beam","Front brake light switch","Rear brake light switch","Turn signals","Horn","Instrument display"],
+  "Controls & Chassis":["Throttle return","Clutch operation","Front brake lever","Rear brake pedal","Mirrors","Side stand","Steering movement","Suspension visual","Accessible fasteners","Accessories secure"]
+};
+
+function makeId(section,item){return (section+"_"+item).toLowerCase().replace(/[^a-z0-9]+/g,"_")}
+
+function buildSections(){
+  const root=document.getElementById("sections");
+  root.innerHTML="";
+  for(const [section,items] of Object.entries(inspectionSections)){
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`<h2 class="section-title">${section}</h2>`;
+    items.forEach(item=>{
+      const id=makeId(section,item);
+      const row=document.createElement("div");
+      row.className="item";
+      row.innerHTML=`
+        <div class="name">${item}</div>
+        <label class="status"><input type="radio" name="${id}" value="Pass"> Pass</label>
+        <label class="status"><input type="radio" name="${id}" value="Monitor"> Monitor</label>
+        <label class="status"><input type="radio" name="${id}" value="Attention"> Attention</label>
+        <div class="note"><input id="${id}_note" placeholder="Notes"></div>`;
+      card.appendChild(row);
+    });
+    root.appendChild(card);
+  }
+}
+
+function collectData(){
+  const data={
+    id:Date.now(),
+    date:document.getElementById("date").value,
+    technician:document.getElementById("technician").value,
+    owner:document.getElementById("owner").value,
+    mileage:document.getElementById("mileage").value,
+    year:document.getElementById("year").value,
+    make:document.getElementById("make").value,
+    model:document.getElementById("model").value,
+    purpose:document.getElementById("purpose").value,
+    overall:document.getElementById("overall").value,
+    score:document.getElementById("score").value,
+    recommendations:document.getElementById("recommendations").value,
+    nextService:document.getElementById("nextService").value,
+    checks:{}
+  };
+  for(const [section,items] of Object.entries(inspectionSections)){
+    items.forEach(item=>{
+      const id=makeId(section,item);
+      const selected=document.querySelector(`input[name="${id}"]:checked`);
+      data.checks[id]={
+        label:item,
+        section,
+        status:selected?selected.value:"",
+        note:document.getElementById(id+"_note").value
+      };
+    });
+  }
+  return data;
+}
+
+function saveInspection(){
+  const data=collectData();
+  let saved=JSON.parse(localStorage.getItem("nightrivet_inspections")||"[]");
+  saved.unshift(data);
+  localStorage.setItem("nightrivet_inspections",JSON.stringify(saved));
+  localStorage.setItem("nightrivet_draft",JSON.stringify(data));
+  renderHistory();
+  alert("Inspection saved on this phone.");
+}
+
+function fillForm(data){
+  ["date","technician","owner","mileage","year","make","model","purpose","overall","score","recommendations","nextService"].forEach(k=>{
+    if(data[k]!==undefined) document.getElementById(k).value=data[k];
+  });
+  for(const [id,v] of Object.entries(data.checks||{})){
+    document.querySelectorAll(`input[name="${id}"]`).forEach(r=>r.checked=(r.value===v.status));
+    const note=document.getElementById(id+"_note");
+    if(note) note.value=v.note||"";
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function loadDraft(){
+  const d=localStorage.getItem("nightrivet_draft");
+  if(!d){alert("No saved draft found.");return;}
+  fillForm(JSON.parse(d));
+}
+
+function loadSaved(id){
+  const saved=JSON.parse(localStorage.getItem("nightrivet_inspections")||"[]");
+  const item=saved.find(x=>x.id===id);
+  if(item) fillForm(item);
+}
+
+function deleteSaved(id){
+  if(!confirm("Delete this saved inspection?")) return;
+  let saved=JSON.parse(localStorage.getItem("nightrivet_inspections")||"[]");
+  saved=saved.filter(x=>x.id!==id);
+  localStorage.setItem("nightrivet_inspections",JSON.stringify(saved));
+  renderHistory();
+}
+
+function clearForm(){
+  if(!confirm("Clear the current form?")) return;
+  document.querySelectorAll("input").forEach(el=>{
+    if(el.type==="radio") el.checked=false;
+    else el.value="";
+  });
+  document.querySelectorAll("textarea").forEach(el=>el.value="");
+  document.getElementById("overall").value="Ride Ready";
+  document.getElementById("date").value=new Date().toISOString().slice(0,10);
+}
+
+function renderHistory(){
+  const list=document.getElementById("historyList");
+  const saved=JSON.parse(localStorage.getItem("nightrivet_inspections")||"[]");
+  if(!saved.length){list.innerHTML="<div class='small'>No inspections saved yet.</div>";return;}
+  list.innerHTML=saved.map(x=>`
+    <div class="history-item">
+      <div class="history-title">${x.year||""} ${x.make||""} ${x.model||""}
+        <span class="badge">${x.overall||"Unrated"}</span>
+      </div>
+      <div class="small">${x.date||"No date"} • ${x.mileage||"No mileage"} miles • ${x.purpose||""}</div>
+      <div class="actions" style="margin:8px 0 0">
+        <button class="secondary" onclick="loadSaved(${x.id})">Open</button>
+        <button class="primary" onclick="deleteSaved(${x.id})">Delete</button>
+      </div>
+    </div>`).join("");
+}
+
+buildSections();
+document.getElementById("date").value=new Date().toISOString().slice(0,10);
+renderHistory();
+</script>
+</body>
+</html>
