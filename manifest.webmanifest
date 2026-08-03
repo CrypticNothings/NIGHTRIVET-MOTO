@@ -1,12 +1,12 @@
 {
   "name": "NightRivet Moto",
   "short_name": "NightRivet",
-  "description": "NightRivet Moto inspection and service record app.",
+  "description": "Motorcycle inspections, photo documentation, service history, references, and backups.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#09090b",
+  "background_color": "#08080a",
+  "theme_color": "#08080a",
   "icons": [
     {
       "src": "icon-192.png",
