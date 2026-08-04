@@ -1,19 +1,603 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08080a"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><title>NightRivet Moto</title><style>
-:root{--bg:#08080a;--p:#151519;--p2:#1d1d23;--l:#36363f;--t:#f3f3f5;--m:#aaaab3;--r:#a61220;--g:#347a4d;--a:#9d7216;--d:#7c111a}*{box-sizing:border-box}body{margin:0;font-family:Arial;background:linear-gradient(#060608,#111116);color:var(--t);min-height:100vh}.app{max-width:980px;margin:auto;padding:14px 14px 70px}.hero{display:flex;gap:14px;align-items:center;padding:15px;border:1px solid var(--l);border-radius:18px;background:linear-gradient(145deg,#19191e,#0b0b0e)}.hero img{width:72px;height:72px;border-radius:18px}.hero h1{margin:0}.muted,.small,label{color:var(--m)}.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}button{border:0;border-radius:11px;padding:12px 10px;font-weight:700;color:#fff;background:#292930}.active,.primary{background:var(--r)}.success{background:var(--g)}.warn{background:var(--a)}.danger{background:var(--d)}.card{background:var(--p);border:1px solid var(--l);border-radius:15px;padding:14px;margin:12px 0}.title{font-size:18px;margin:0 0 11px;border-left:4px solid var(--r);padding-left:9px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.bike,.record,.ref{background:var(--p2);border:1px solid var(--l);border-radius:12px;padding:12px;margin:9px 0}.bike{display:flex;justify-content:space-between;gap:10px;align-items:center}.bt{font-weight:800}.small{font-size:12px}label{display:block;font-size:12px;margin-bottom:5px}input,textarea,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--l);background:#0d0d11;color:#fff;font-size:16px}textarea{min-height:80px}.item{border:1px solid var(--l);border-radius:12px;background:#111116;padding:11px;margin:9px 0}.ih{font-weight:800;margin-bottom:9px}.statuses{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}.choice{display:flex;justify-content:center;gap:5px;padding:8px;border:1px solid var(--l);border-radius:9px;font-size:12px}.choice input{width:auto}.tools{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.strip{display:flex;gap:8px;overflow-x:auto;padding-top:9px}.tw{position:relative;flex:0 0 auto}.thumb{width:88px;height:88px;object-fit:cover;border-radius:9px;border:1px solid #4a4a55}.x{position:absolute;right:-4px;top:-4px;width:25px;height:25px;border-radius:50%;padding:0;background:#8d101a}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{flex:1 1 145px}.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#303038;font-size:12px;margin-left:6px}.hidden{display:none}.notice{border:1px solid #5a4513;background:#241d0e;color:#e8d499;padding:10px;border-radius:10px;font-size:13px}.modal{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:15px;z-index:20}.modal.open{display:flex}.mc{max-width:900px;width:100%;max-height:94vh;overflow:auto;background:#111116;border:1px solid var(--l);border-radius:14px;padding:12px}.mc img{width:100%;border-radius:10px}.fi{display:none}.refimg{width:100%;max-height:240px;object-fit:cover;border-radius:10px}@media(max-width:700px){.grid{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}.bike{align-items:flex-start;flex-direction:column}.bike button{width:100%}}@media print{body{background:#fff;color:#000}.nav,.actions,.photo,.x,.hero img,.notice{display:none!important}.card,.hero,.item{background:#fff;border:1px solid #999}.small,label{color:#333}input,textarea,select{background:#fff;color:#000;border:1px solid #999}}
-</style></head><body><div class="app"><header class="hero"><img src="icon-192.png"><div><h1>NightRivet Moto</h1><div class="muted">Inspect. Document. Improve.</div></div></header><nav class="nav"><button id="nGarage" class="active" onclick="view('garage')">Garage</button><button id="nInspection" onclick="start('z500')">Inspection</button><button id="nHistory" onclick="view('history')">History</button><button id="nGallery" onclick="view('tools')">Gallery</button></nav>
-<section id="garage"><div class="card"><h2 class="title">My Garage</h2><div class="bike"><div><div class="bt">2024 Kawasaki Z500 SE ABS</div><div class="small">Primary rider • Chain drive</div></div><button class="primary" onclick="start('z500')">Start Inspection</button></div><div class="bike"><div><div class="bt">2005 Kawasaki Vulcan 500</div><div class="small">Project bike • Revival documentation</div></div><button onclick="start('vulcan')">Start Inspection</button></div></div><div class="card"><h2 class="title">Quick Start</h2><div class="grid"><button class="primary" onclick="start('z500','Lake City to Tallahassee Ride Ready')">Ride Ready Inspection</button><button onclick="view('history')">Saved Records</button></div></div><div class="notice">Records and photos stay on this device. Export a backup regularly, especially before updates or changing phones.</div></section>
-<section id="inspection" class="hidden"><div class="card"><h2 class="title">Bike & Inspection Information</h2><div class="grid"><div><label>Date</label><input id="date" type="date"></div><div><label>Technician</label><input id="technician" value="Sterling"></div><div><label>Owner / Customer</label><input id="owner" value="Sterling"></div><div><label>Mileage</label><input id="mileage"></div><div><label>Year</label><input id="year"></div><div><label>Make</label><input id="make"></div><div><label>Model</label><input id="model"></div><div><label>Purpose</label><input id="purpose"></div></div></div><div id="sections"></div><div class="card"><h2 class="title">Final Assessment</h2><div class="grid"><div><label>Overall Condition</label><select id="overall"><option>Ride Ready</option><option>Service Recommended</option><option>Repair Before Riding</option></select></div><div><label>Ride Score</label><input id="score" type="number" min="0" max="100"></div></div><div style="margin-top:10px"><label>Recommendations</label><textarea id="recommendations"></textarea></div><div style="margin-top:10px"><label>Next Service Due</label><input id="nextService"></div><div class="actions"><button class="success" onclick="saveRec()">Save Inspection</button><button onclick="print()">Print / Save PDF</button><button class="danger" onclick="clearForm(true)">Clear</button></div></div></section>
-<section id="history" class="hidden"><div class="card"><h2 class="title">Service History</h2><input id="search" placeholder="Search records" oninput="renderHistory()"><div id="historyList"></div></div></section>
-<section id="tools" class="hidden"><div class="card"><h2 class="title">Reference Gallery</h2><div class="grid"><div><label>Category</label><select id="refCategory"><option>Chain</option><option>Sprocket</option><option>Tire</option><option>Brake</option><option>Leak</option><option>Electrical</option><option>Other</option></select></div><div><label>Title</label><input id="refTitle" placeholder="Kinked chain link"></div></div><div style="margin-top:10px"><label>Notes</label><textarea id="refNotes"></textarea></div><input id="refInput" class="fi" type="file" accept="image/*" onchange="addRef(event)"><div class="actions"><button class="primary" onclick="refInput.click()">Choose Reference Photo</button></div><div id="refList"></div></div><div class="card"><h2 class="title">Backup & Restore</h2><div class="actions"><button class="success" onclick="backup()">Export Backup</button><button onclick="imp.click()">Import Backup</button></div><input id="imp" class="fi" type="file" accept=".json,application/json" onchange="restore(event)"></div></section></div>
-<div id="modal" class="modal" onclick="if(event.target===modal)modal.classList.remove('open')"><div class="mc"><button class="danger" onclick="modal.classList.remove('open')">Close</button><img id="big"><div id="cap" class="small"></div></div></div>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08080a">
+<meta name="description" content="NightRivet Moto motorcycle inspection, service documentation, photo records, and workshop journal.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>NightRivet Moto</title>
+<style>
+:root{
+ --bg:#08080a;--panel:#151519;--panel2:#1d1d23;--line:#36363f;--text:#f3f3f5;
+ --muted:#aaaab4;--red:#a81220;--red2:#620910;--green:#347a4d;--amber:#9b7116;
+ --danger:#771018;--blue:#315c87;--shadow:0 12px 30px #0008;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#050507,#111116);color:var(--text)}
+button,input,textarea,select{font:inherit}
+.app{max-width:1000px;margin:auto;padding:14px 14px 72px}
+.hero{display:flex;align-items:center;gap:14px;padding:15px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#19191e,#0b0b0e);box-shadow:var(--shadow)}
+.hero img{width:70px;height:70px;border-radius:17px}
+.hero h1{margin:0;font-size:27px}
+.tag{color:var(--muted);margin-top:5px}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:12px 0}
+button{border:0;border-radius:11px;padding:12px 10px;font-size:14px;font-weight:700;color:#fff;background:#292930;cursor:pointer}
+button.active,.primary{background:var(--red)}
+button.success{background:var(--green)}
+button.warn{background:var(--amber)}
+button.danger{background:var(--danger)}
+button.blue{background:var(--blue)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;margin:12px 0}
+.title{font-size:18px;margin:0 0 11px;border-left:4px solid var(--red);padding-left:9px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.home-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.action-card{padding:18px 14px;text-align:left;min-height:96px;border:1px solid var(--line);background:linear-gradient(145deg,#222229,#151519)}
+.action-card b{display:block;font-size:17px;margin-bottom:6px}.action-card span{font-size:12px;color:#c1c1c9;font-weight:400}
+.bike,.record{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0}
+.bike{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.bike-name{font-weight:800}
+.small{font-size:12px;color:var(--muted)}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+input,textarea,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0d0d11;color:#fff;font-size:16px}
+textarea{min-height:82px;resize:vertical}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions button{flex:1 1 145px}
+.hidden{display:none}
+.notice{border:1px solid #5a4513;background:#251e0f;color:#ead79c;padding:10px;border-radius:10px;font-size:13px}
+.item{border:1px solid var(--line);border-radius:12px;background:#101015;padding:11px;margin:9px 0}
+.item-name{font-weight:800;margin-bottom:9px}
+.status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.status{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border:1px solid var(--line);border-radius:9px;font-size:12px;color:#ddd}
+.status input{width:auto}
+.item-tools{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.file{display:none}
+.photo-strip{display:flex;gap:8px;overflow-x:auto;padding-top:9px}
+.photo-wrap{position:relative;flex:0 0 auto}
+.thumb{width:90px;height:90px;object-fit:cover;border-radius:9px;border:1px solid #50505a}
+.remove{position:absolute;right:-4px;top:-4px;width:25px;height:25px;border-radius:50%;padding:0;background:#8e111b}
+.photo-zone{border:1px dashed #4b4b56;border-radius:12px;padding:11px;margin-top:10px}
+.photo-zone h3{font-size:15px;margin:0 0 7px}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#303038;font-size:12px;margin-left:6px}
+.record-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.tabs{display:flex;gap:7px;overflow-x:auto;margin-bottom:10px}
+.tabs button{white-space:nowrap;flex:0 0 auto}
+.service-fields{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.check-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #292930}
+.check-row input{width:auto}
+.search{margin-bottom:10px}
+.ref-photo{width:100%;max-height:260px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.modal{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}
+.modal.open{display:flex}
+.modal-box{max-width:900px;width:100%;max-height:94vh;overflow:auto;background:#111116;border:1px solid var(--line);border-radius:14px;padding:12px}
+.modal img{width:100%;height:auto;border-radius:10px}
+.modal-close{position:sticky;top:0;float:right;background:var(--danger);z-index:2}
+@media(max-width:760px){
+ .nav{grid-template-columns:repeat(3,1fr)}
+ .grid,.home-actions{grid-template-columns:1fr}
+ .bike{align-items:flex-start;flex-direction:column}.bike button{width:100%}
+ .item-tools{grid-template-columns:1fr}
+}
+@media print{
+ body{background:#fff;color:#000}
+ .nav,.actions,.hero img,.remove,.notice,.tabs,.file{display:none!important}
+ .card,.hero,.item,.record{background:#fff;border:1px solid #999;box-shadow:none}
+ .small,label{color:#333}
+ input,textarea,select{background:#fff;color:#000;border:1px solid #999}
+ .thumb{width:125px;height:125px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="hero">
+ <img src="icon-192.png" alt="NightRivet Moto">
+ <div><h1>NightRivet Moto</h1><div class="tag">Stop. Observe. Record. Repair. Verify.</div></div>
+</header>
+
+<nav class="nav">
+ <button id="navHome" class="active" onclick="showView('home')">Home</button>
+ <button id="navInspection" onclick="newInspection('z500')">Inspection</button>
+ <button id="navService" onclick="newService('z500')">Service</button>
+ <button id="navHistory" onclick="showView('history')">History</button>
+ <button id="navGallery" onclick="showView('gallery')">Gallery</button>
+</nav>
+
+<section id="homeView">
+ <div class="card">
+  <h2 class="title">What are you doing today?</h2>
+  <div class="home-actions">
+   <button class="action-card primary" onclick="newInspection('z500')"><b>Ride Ready Inspection</b><span>Check condition, measurements, findings, and reference photos.</span></button>
+   <button class="action-card success" onclick="newService('z500')"><b>Log a Service</b><span>Oil change, tire change, chain service, battery, brakes, or custom work.</span></button>
+   <button class="action-card blue" onclick="newService('vulcan','Repair / Diagnosis')"><b>Repair / Diagnosis</b><span>Record the problem, diagnosis, repair steps, result, and lessons learned.</span></button>
+   <button class="action-card" onclick="showView('gallery')"><b>Reference Gallery</b><span>Save photos you want to compare, study, or show later.</span></button>
+  </div>
+ </div>
+ <div class="card">
+  <h2 class="title">My Garage</h2>
+  <div class="bike"><div><div class="bike-name">2024 Kawasaki Z500 SE ABS</div><div class="small">Primary rider</div></div><div class="actions"><button onclick="newInspection('z500')">Inspect</button><button class="success" onclick="newService('z500')">Service</button></div></div>
+  <div class="bike"><div><div class="bike-name">2005 Kawasaki Vulcan 500</div><div class="small">Project bike / revival journal</div></div><div class="actions"><button onclick="newInspection('vulcan')">Inspect</button><button class="success" onclick="newService('vulcan','Repair / Diagnosis')">Log Work</button></div></div>
+ </div>
+ <div class="notice">Important records and photos are stored on this device. Export a backup regularly from Gallery → Backup & Restore.</div>
+</section>
+
+<section id="inspectionView" class="hidden">
+ <div class="card">
+  <h2 class="title">Inspection Information</h2>
+  <div class="grid">
+   <div><label>Date</label><input id="iDate" type="date"></div>
+   <div><label>Technician</label><input id="iTech" value="Sterling"></div>
+   <div><label>Owner / Customer</label><input id="iOwner" value="Sterling"></div>
+   <div><label>Mileage</label><input id="iMileage" inputmode="numeric"></div>
+   <div><label>Year</label><input id="iYear"></div>
+   <div><label>Make</label><input id="iMake"></div>
+   <div><label>Model</label><input id="iModel"></div>
+   <div><label>Purpose</label><input id="iPurpose"></div>
+  </div>
+ </div>
+ <div id="inspectionSections"></div>
+ <div class="card">
+  <h2 class="title">Inspection Result</h2>
+  <div class="grid">
+   <div><label>Overall Condition</label><select id="iOverall"><option>Ride Ready</option><option>Service Recommended</option><option>Repair Before Riding</option></select></div>
+   <div><label>Ride Score</label><input id="iScore" type="number" min="0" max="100"></div>
+  </div>
+  <div style="margin-top:10px"><label>Recommendations / Findings</label><textarea id="iRecommendations"></textarea></div>
+  <div style="margin-top:10px"><label>Next Service Due</label><input id="iNext"></div>
+  <div class="actions"><button class="success" onclick="saveInspection()">Save Inspection</button><button onclick="window.print()">Print / Save PDF</button><button class="danger" onclick="clearInspection(true)">Clear</button></div>
+ </div>
+</section>
+
+<section id="serviceView" class="hidden">
+ <div class="card">
+  <h2 class="title">Service Record</h2>
+  <div class="grid">
+   <div><label>Date</label><input id="sDate" type="date"></div>
+   <div><label>Technician</label><input id="sTech" value="Sterling"></div>
+   <div><label>Owner / Customer</label><input id="sOwner" value="Sterling"></div>
+   <div><label>Mileage</label><input id="sMileage" inputmode="numeric"></div>
+   <div><label>Year</label><input id="sYear"></div>
+   <div><label>Make</label><input id="sMake"></div>
+   <div><label>Model</label><input id="sModel"></div>
+   <div><label>Service Type</label>
+    <select id="sType" onchange="renderServiceTemplate()">
+     <option>Oil Change</option>
+     <option>Tire Change</option>
+     <option>Chain Service</option>
+     <option>Battery Service</option>
+     <option>Brake Service</option>
+     <option>Repair / Diagnosis</option>
+     <option>Custom Service</option>
+    </select>
+   </div>
+  </div>
+  <div id="serviceTemplate" class="service-fields"></div>
+ </div>
+
+ <div class="card">
+  <h2 class="title">Job Documentation</h2>
+  <div><label>Reason for Service / Customer Concern</label><textarea id="sConcern"></textarea></div>
+  <div style="margin-top:10px"><label>Work Performed</label><textarea id="sWork" placeholder="Record the actual steps completed."></textarea></div>
+  <div style="margin-top:10px"><label>Parts and Materials Used</label><textarea id="sParts" placeholder="Part numbers, oil, filter, tire, valve stem, chain lube, washers, etc."></textarea></div>
+  <div style="margin-top:10px"><label>Measurements / Torque Values</label><textarea id="sMeasurements" placeholder="Slack, PSI, torque values, fluid quantity, tread depth, battery voltage, etc."></textarea></div>
+  <div style="margin-top:10px"><label>Final Verification / Test Result</label><textarea id="sResult" placeholder="Leak check, test ride, brake feel, chain movement, charging voltage, etc."></textarea></div>
+  <div style="margin-top:10px"><label>What Did I Learn?</label><textarea id="sLesson" placeholder="One useful lesson future you should not have to relearn."></textarea></div>
+
+  <div class="photo-zone">
+   <h3>Before Photos</h3>
+   <div class="small">Condition before work begins.</div>
+   <input id="beforeInput" class="file" type="file" accept="image/*" multiple onchange="addServicePhotos('before',event)">
+   <div class="actions"><button onclick="beforeInput.click()">Choose Before Photo(s)</button></div>
+   <div id="beforeStrip" class="photo-strip"></div>
+  </div>
+
+  <div class="photo-zone">
+   <h3>After Photos</h3>
+   <div class="small">Completed work, installed parts, measurements, and final condition.</div>
+   <input id="afterInput" class="file" type="file" accept="image/*" multiple onchange="addServicePhotos('after',event)">
+   <div class="actions"><button onclick="afterInput.click()">Choose After Photo(s)</button></div>
+   <div id="afterStrip" class="photo-strip"></div>
+  </div>
+
+  <div class="grid" style="margin-top:10px">
+   <div><label>Job Status</label><select id="sStatus"><option>Completed</option><option>In Progress</option><option>Waiting on Parts</option><option>Needs Recheck</option></select></div>
+   <div><label>Next Service / Follow-up Due</label><input id="sNext"></div>
+  </div>
+
+  <div class="actions"><button class="success" onclick="saveService()">Save Service Record</button><button onclick="window.print()">Print / Save PDF</button><button class="danger" onclick="clearService(true)">Clear</button></div>
+ </div>
+</section>
+
+<section id="historyView" class="hidden">
+ <div class="card">
+  <h2 class="title">Complete Motorcycle History</h2>
+  <div class="tabs"><button id="filterAll" class="active" onclick="setHistoryFilter('all')">All</button><button id="filterInspections" onclick="setHistoryFilter('inspection')">Inspections</button><button id="filterServices" onclick="setHistoryFilter('service')">Services</button></div>
+  <input id="historySearch" class="search" placeholder="Search bike, date, service, finding, part, or lesson" oninput="renderHistory()">
+  <div id="historyList"></div>
+ </div>
+</section>
+
+<section id="galleryView" class="hidden">
+ <div class="card">
+  <h2 class="title">Reference Gallery</h2>
+  <div class="grid">
+   <div><label>Category</label><select id="gCategory"><option>Chain</option><option>Sprocket</option><option>Tire</option><option>Brake</option><option>Leak</option><option>Electrical</option><option>Tool / Setup</option><option>Other</option></select></div>
+   <div><label>Title</label><input id="gTitle" placeholder="Example: Kinked chain link"></div>
+  </div>
+  <div style="margin-top:10px"><label>Why This Photo Matters</label><textarea id="gNotes"></textarea></div>
+  <input id="gInput" class="file" type="file" accept="image/*" onchange="saveGalleryPhoto(event)">
+  <div class="actions"><button class="primary" onclick="gInput.click()">Choose Reference Photo</button></div>
+  <div id="galleryList"></div>
+ </div>
+ <div class="card">
+  <h2 class="title">Backup & Restore</h2>
+  <div class="small">Backups include inspections, services, notes, before/after photos, lessons learned, and reference photos.</div>
+  <div class="actions"><button class="success" onclick="exportBackup()">Export Backup</button><button onclick="importInput.click()">Import Backup</button></div>
+  <input id="importInput" class="file" type="file" accept=".json,application/json" onchange="importBackup(event)">
+ </div>
+</section>
+</div>
+
+<div id="photoModal" class="modal" onclick="closeModal(event)">
+ <div class="modal-box"><button class="modal-close" onclick="forceCloseModal()">Close</button><img id="modalImage"><div id="modalCaption" class="small" style="margin-top:8px"></div></div>
+</div>
+
 <script>
-const VERSION='3.0.0',DB='NightRivetMotoDB';let db,photos={},current=null;const bikes={z500:{year:'2024',make:'Kawasaki',model:'Z500 SE ABS',purpose:'Ride Ready inspection'},vulcan:{year:'2005',make:'Kawasaki',model:'Vulcan 500',purpose:'Project bike inspection'}};const groups={'Tires & Wheels':['Front tire pressure','Rear tire pressure','Tread condition','Tire damage or punctures','Wheel condition','Valve stems'],'Chain & Drivetrain':['Chain condition','Chain slack','Chain lubrication','Front sprocket','Rear sprocket','Rear wheel alignment'],'Brakes':['Front brake operation','Rear brake operation','Front pad thickness','Rear pad thickness','Front rotor','Rear rotor','Brake fluid level'],'Fluids & Leaks':['Engine oil level','Coolant level','Visible fluid leaks'],'Electrical':['Low beam','High beam','Front brake light switch','Rear brake light switch','Turn signals','Horn','Instrument display'],'Controls & Chassis':['Throttle return','Clutch operation','Front brake lever','Rear brake pedal','Mirrors','Side stand','Steering movement','Suspension visual','Accessible fasteners','Accessories secure']};
-function oid(s,i){return(s+'_'+i).toLowerCase().replace(/[^a-z0-9]+/g,'_')}function td(){return new Date().toISOString().slice(0,10)}function openDB(){return new Promise((ok,no)=>{let r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{let d=r.result;if(!d.objectStoreNames.contains('records'))d.createObjectStore('records',{keyPath:'id'});if(!d.objectStoreNames.contains('refs'))d.createObjectStore('refs',{keyPath:'id'})};r.onsuccess=()=>{db=r.result;ok()};r.onerror=()=>no(r.error)})}function store(n,m='readonly'){return db.transaction(n,m).objectStore(n)}function all(n){return new Promise((ok,no)=>{let r=store(n).getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>no(r.error)})}function one(n,id){return new Promise((ok,no)=>{let r=store(n).get(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}function put(n,v){return new Promise((ok,no)=>{let r=store(n,'readwrite').put(v);r.onsuccess=ok;r.onerror=()=>no(r.error)})}function del(n,id){return new Promise((ok,no)=>{let r=store(n,'readwrite').delete(id);r.onsuccess=ok;r.onerror=()=>no(r.error)})}
-function build(){sections.innerHTML='';for(const[s,items]of Object.entries(groups)){let c=document.createElement('div');c.className='card';c.innerHTML=`<h2 class="title">${s}</h2>`;for(const item of items){let id=oid(s,item),r=document.createElement('div');r.className='item';r.innerHTML=`<div class="ih">${item}</div><div class="statuses"><label class="choice"><input type="radio" name="${id}" value="Pass">Pass</label><label class="choice"><input type="radio" name="${id}" value="Monitor">Monitor</label><label class="choice"><input type="radio" name="${id}" value="Attention">Attention</label></div><div class="tools"><div><label>Notes</label><input id="${id}_note" placeholder="Condition, measurement, recommendation"></div><div><input class="fi" id="${id}_input" type="file" accept="image/*" multiple onchange="attach('${id}',event)"><button class="photo" onclick="document.getElementById('${id}_input').click()">Choose Photo(s)</button></div></div><div id="${id}_photos" class="strip"></div>`;c.appendChild(r)}sections.appendChild(c)}}
-function view(v){for(const x of ['garage','inspection','history','tools'])document.getElementById(x).classList.toggle('hidden',x!==v);for(const x of ['Garage','Inspection','History'])document.getElementById('n'+x).classList.toggle('active',x.toLowerCase()===v);document.getElementById('nGallery').classList.toggle('active',v==='tools');if(v==='history')renderHistory();if(v==='tools')renderRefs();scrollTo({top:0,behavior:'smooth'})}function start(k='z500',p=''){clearForm(false);let b=bikes[k];year.value=b.year;make.value=b.make;model.value=b.model;purpose.value=p||b.purpose;view('inspection')}function clearForm(ask=true){if(ask&&!confirm('Clear unsaved information and photos?'))return;document.querySelectorAll('#inspection input').forEach(e=>{if(e.type==='radio')e.checked=false;else if(e.type!=='file')e.value=''});document.querySelectorAll('#inspection textarea').forEach(e=>e.value='');date.value=td();technician.value=owner.value='Sterling';overall.value='Ride Ready';photos={};current=null;document.querySelectorAll('.strip').forEach(e=>e.innerHTML='')}
-function resize(f){return new Promise((ok,no)=>{let r=new FileReader;r.onload=()=>{let im=new Image;im.onload=()=>{let w=im.width,h=im.height,sc=Math.min(1,1500/Math.max(w,h));w*=sc;h*=sc;let c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);ok(c.toDataURL('image/jpeg',.82))};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(f)})}async function attach(id,e){photos[id]=photos[id]||[];for(const f of e.target.files)photos[id].push({id:Date.now()+Math.random(),data:await resize(f)});e.target.value='';drawPhotos(id)}function drawPhotos(id){let s=document.getElementById(id+'_photos');if(!s)return;s.innerHTML=(photos[id]||[]).map((p,i)=>`<div class="tw"><img class="thumb" src="${p.data}" onclick="showPhoto('${id}',${i})"><button class="x" onclick="photos['${id}'].splice(${i},1);drawPhotos('${id}')">×</button></div>`).join('')}function showPhoto(id,i){big.src=photos[id][i].data;cap.textContent=id.replaceAll('_',' ');modal.classList.add('open')}
-function collect(){let r={id:current||Date.now(),version:VERSION,date:date.value,technician:technician.value,owner:owner.value,mileage:mileage.value,year:year.value,make:make.value,model:model.value,purpose:purpose.value,overall:overall.value,score:score.value,recommendations:recommendations.value,nextService:nextService.value,updatedAt:new Date().toISOString(),checks:{}};for(const[s,items]of Object.entries(groups))for(const item of items){let id=oid(s,item),q=document.querySelector(`input[name="${id}"]:checked`);r.checks[id]={section:s,label:item,status:q?q.value:'',note:document.getElementById(id+'_note').value,photos:photos[id]||[]}}return r}async function saveRec(){let r=collect();await put('records',r);current=r.id;alert('Inspection saved with photos.');view('history')}async function renderHistory(){let q=(search.value||'').toLowerCase(),a=(await all('records')).sort((x,y)=>(y.updatedAt||'').localeCompare(x.updatedAt||'')).filter(x=>JSON.stringify(x).toLowerCase().includes(q));historyList.innerHTML=a.length?a.map(x=>{let pc=Object.values(x.checks||{}).reduce((n,c)=>n+(c.photos?.length||0),0);return`<div class="record"><b>${x.year||''} ${x.make||''} ${x.model||''}</b><span class="badge">${x.overall||'Unrated'}</span><div class="small">${x.date||''} • ${x.mileage||'No mileage'} miles • ${pc} photos • ${x.purpose||''}</div><div class="actions"><button onclick="openRec(${x.id})">Open</button><button class="danger" onclick="deleteRec(${x.id})">Delete</button></div></div>`}).join(''):'<div class="small">No matching inspections.</div>'}async function openRec(id){let r=await one('records',id);clearForm(false);current=r.id;for(const k of ['date','technician','owner','mileage','year','make','model','purpose','overall','score','recommendations','nextService'])if(r[k]!=null)document.getElementById(k).value=r[k];for(const[id,c]of Object.entries(r.checks||{})){document.querySelectorAll(`input[name="${id}"]`).forEach(e=>e.checked=e.value===c.status);let n=document.getElementById(id+'_note');if(n)n.value=c.note||'';photos[id]=c.photos||[];drawPhotos(id)}view('inspection')}async function deleteRec(id){if(confirm('Delete this record and its photos?')){await del('records',id);renderHistory()}}
-async function addRef(e){if(!refTitle.value.trim()){alert('Enter a title first.');return}let r={id:Date.now(),category:refCategory.value,title:refTitle.value.trim(),notes:refNotes.value.trim(),photo:await resize(e.target.files[0]),createdAt:new Date().toISOString()};await put('refs',r);refTitle.value=refNotes.value='';e.target.value='';renderRefs()}async function renderRefs(){let a=(await all('refs')).sort((x,y)=>y.id-x.id);refList.innerHTML=a.length?a.map(r=>`<div class="ref"><img class="refimg" src="${r.photo}" onclick='big.src=${JSON.stringify(r.photo)};cap.textContent=${JSON.stringify(r.category+' — '+r.title)};modal.classList.add("open")'><div><b>${r.title}</b><span class="badge">${r.category}</span></div><div class="small">${r.notes||''}</div><div class="actions"><button class="danger" onclick="deleteRef(${r.id})">Delete</button></div></div>`).join(''):'<div class="small">No reference photos yet.</div>'}async function deleteRef(id){if(confirm('Delete this reference photo?')){await del('refs',id);renderRefs()}}
-async function backup(){let p={app:'NightRivet Moto',version:VERSION,exportedAt:new Date().toISOString(),records:await all('records'),references:await all('refs')},b=new Blob([JSON.stringify(p)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`NightRivet_Backup_${td()}.json`;a.click()}async function restore(e){try{let p=JSON.parse(await e.target.files[0].text());if(!Array.isArray(p.records)||!Array.isArray(p.references))throw 0;if(!confirm(`Import ${p.records.length} inspections and ${p.references.length} reference photos?`))return;for(const r of p.records)await put('records',r);for(const r of p.references)await put('refs',r);alert('Backup imported.');view('history')}catch(x){alert('Invalid NightRivet backup file.')}e.target.value=''}async function migrate(){for(const k of ['nr_v2_records','nightrivet_inspections']){let raw=localStorage.getItem(k);if(!raw)continue;try{for(const r of JSON.parse(raw)){for(const c of Object.values(r.checks||{}))c.photos=c.photos||[];r.updatedAt=r.updatedAt||new Date(Number(r.id)||Date.now()).toISOString();await put('records',r)}localStorage.removeItem(k)}catch(e){}}}
-(async()=>{await openDB();build();date.value=td();await migrate();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js')})();
-</script></body></html>
+const APP_VERSION="4.0.0";
+const DB_NAME="NightRivetMotoDB";
+const DB_VERSION=2;
+let db;
+let inspectionPhotos={};
+let servicePhotos={before:[],after:[]};
+let currentInspectionId=null;
+let currentServiceId=null;
+let historyFilter="all";
+
+const bikes={
+ z500:{year:"2024",make:"Kawasaki",model:"Z500 SE ABS"},
+ vulcan:{year:"2005",make:"Kawasaki",model:"Vulcan 500"}
+};
+
+const inspectionGroups={
+"Tires & Wheels":["Front tire pressure","Rear tire pressure","Tread condition","Tire damage or punctures","Wheel condition","Valve stems"],
+"Chain & Drivetrain":["Chain condition","Chain slack","Chain lubrication","Front sprocket","Rear sprocket","Rear wheel alignment"],
+"Brakes":["Front brake operation","Rear brake operation","Front pad thickness","Rear pad thickness","Front rotor","Rear rotor","Brake fluid level"],
+"Fluids & Leaks":["Engine oil level","Coolant level","Visible fluid leaks"],
+"Electrical":["Low beam","High beam","Front brake light switch","Rear brake light switch","Turn signals","Horn","Instrument display"],
+"Controls & Chassis":["Throttle return","Clutch operation","Front brake lever","Rear brake pedal","Mirrors","Side stand","Steering movement","Suspension visual","Accessible fasteners","Accessories secure"]
+};
+
+const templates={
+"Oil Change":[
+ {type:"text",id:"oilBrand",label:"Oil Brand / Product"},
+ {type:"text",id:"oilViscosity",label:"Viscosity"},
+ {type:"text",id:"oilQuantity",label:"Quantity Added"},
+ {type:"text",id:"oilFilter",label:"Oil Filter / Part Number"},
+ {type:"check",id:"washer",label:"Drain washer replaced"},
+ {type:"check",id:"leakCheck",label:"Post-service leak check completed"}
+],
+"Tire Change":[
+ {type:"select",id:"wheelPosition",label:"Wheel / Position",options:["Front","Rear","Both"]},
+ {type:"text",id:"tireBrand",label:"Tire Brand / Model"},
+ {type:"text",id:"tireSize",label:"Tire Size"},
+ {type:"text",id:"dotDate",label:"DOT Date Code"},
+ {type:"text",id:"finalPsi",label:"Final PSI"},
+ {type:"check",id:"balanced",label:"Wheel balanced"},
+ {type:"check",id:"valveStem",label:"Valve stem inspected or replaced"},
+ {type:"check",id:"rotation",label:"Rotation direction verified"}
+],
+"Chain Service":[
+ {type:"select",id:"chainJob",label:"Service Performed",options:["Clean & Lube","Adjustment","Replacement","Clean, Adjust & Lube"]},
+ {type:"text",id:"slackBefore",label:"Slack Before"},
+ {type:"text",id:"slackAfter",label:"Slack After"},
+ {type:"text",id:"chainProduct",label:"Cleaner / Lubricant Used"},
+ {type:"check",id:"alignment",label:"Rear wheel alignment verified"},
+ {type:"check",id:"tightLinks",label:"Tight or kinked links rechecked"}
+],
+"Battery Service":[
+ {type:"select",id:"batteryJob",label:"Service Performed",options:["Charge / Maintain","Battery Replacement","Terminal Service","Electrical Baseline Test"]},
+ {type:"text",id:"batteryType",label:"Battery Brand / Type"},
+ {type:"text",id:"restVoltage",label:"Resting Voltage"},
+ {type:"text",id:"crankVoltage",label:"Cranking Voltage"},
+ {type:"text",id:"chargeVoltage",label:"Charging Voltage"},
+ {type:"check",id:"terminals",label:"Terminals cleaned and tightened"}
+],
+"Brake Service":[
+ {type:"select",id:"brakePosition",label:"Brake Position",options:["Front","Rear","Both"]},
+ {type:"select",id:"brakeJob",label:"Service Performed",options:["Inspection","Pad Replacement","Fluid Change / Bleed","Rotor Service","Cleaning"]},
+ {type:"text",id:"padBefore",label:"Pad Thickness Before"},
+ {type:"text",id:"padAfter",label:"Pad Thickness After"},
+ {type:"text",id:"fluidType",label:"Brake Fluid Type"},
+ {type:"check",id:"firmLever",label:"Firm lever / pedal verified"},
+ {type:"check",id:"roadTest",label:"Low-speed brake test completed"}
+],
+"Repair / Diagnosis":[
+ {type:"text",id:"symptom",label:"Primary Symptom"},
+ {type:"textarea",id:"diagnosis",label:"Diagnosis / Tests Performed"},
+ {type:"textarea",id:"cause",label:"Confirmed or Suspected Cause"},
+ {type:"check",id:"verifiedRepair",label:"Repair verified after completion"}
+],
+"Custom Service":[
+ {type:"text",id:"customName",label:"Service Name"},
+ {type:"textarea",id:"customDetails",label:"Service-Specific Details"}
+]
+};
+
+function today(){return new Date().toISOString().slice(0,10)}
+function itemId(s,i){return(s+"_"+i).toLowerCase().replace(/[^a-z0-9]+/g,"_")}
+function openDB(){
+ return new Promise((resolve,reject)=>{
+  const r=indexedDB.open(DB_NAME,DB_VERSION);
+  r.onupgradeneeded=()=>{
+   const d=r.result;
+   if(!d.objectStoreNames.contains("records"))d.createObjectStore("records",{keyPath:"id"});
+   if(!d.objectStoreNames.contains("refs"))d.createObjectStore("refs",{keyPath:"id"});
+   if(!d.objectStoreNames.contains("services"))d.createObjectStore("services",{keyPath:"id"});
+  };
+  r.onsuccess=()=>{db=r.result;resolve()};
+  r.onerror=()=>reject(r.error);
+ });
+}
+function store(name,mode="readonly"){return db.transaction(name,mode).objectStore(name)}
+function getAll(name){return new Promise((resolve,reject)=>{const r=store(name).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error)})}
+function getOne(name,id){return new Promise((resolve,reject)=>{const r=store(name).get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+function putOne(name,value){return new Promise((resolve,reject)=>{const r=store(name,"readwrite").put(value);r.onsuccess=resolve;r.onerror=()=>reject(r.error)})}
+function deleteOne(name,id){return new Promise((resolve,reject)=>{const r=store(name,"readwrite").delete(id);r.onsuccess=resolve;r.onerror=()=>reject(r.error)})}
+
+function showView(name){
+ ["home","inspection","service","history","gallery"].forEach(v=>document.getElementById(v+"View").classList.toggle("hidden",v!==name));
+ ["Home","Inspection","Service","History","Gallery"].forEach(v=>document.getElementById("nav"+v).classList.toggle("active",v.toLowerCase()===name));
+ if(name==="history")renderHistory();
+ if(name==="gallery")renderGallery();
+ scrollTo({top:0,behavior:"smooth"});
+}
+
+function buildInspection(){
+ inspectionSections.innerHTML="";
+ Object.entries(inspectionGroups).forEach(([group,items])=>{
+  const card=document.createElement("div");card.className="card";card.innerHTML=`<h2 class="title">${group}</h2>`;
+  items.forEach(item=>{
+   const id=itemId(group,item);
+   const row=document.createElement("div");row.className="item";row.dataset.item=id;
+   row.innerHTML=`<div class="item-name">${item}</div>
+   <div class="status-row">
+    <label class="status"><input type="radio" name="${id}" value="Pass">Pass</label>
+    <label class="status"><input type="radio" name="${id}" value="Monitor">Monitor</label>
+    <label class="status"><input type="radio" name="${id}" value="Attention">Attention</label>
+   </div>
+   <div class="item-tools">
+    <div><label>Notes / Measurement</label><input id="${id}_note"></div>
+    <div><input id="${id}_input" class="file" type="file" accept="image/*" multiple onchange="addInspectionPhotos('${id}',event)"><button onclick="document.getElementById('${id}_input').click()">Choose Photo(s)</button></div>
+   </div>
+   <div id="${id}_strip" class="photo-strip"></div>`;
+   card.appendChild(row);
+  });
+  inspectionSections.appendChild(card);
+ });
+}
+
+function newInspection(key="z500"){
+ clearInspection(false);
+ const b=bikes[key]||bikes.z500;
+ iYear.value=b.year;iMake.value=b.make;iModel.value=b.model;
+ iPurpose.value=key==="z500"?"Ride Ready inspection":"Project bike inspection";
+ showView("inspection");
+}
+function clearInspection(ask=true){
+ if(ask&&!confirm("Clear this inspection and unsaved photos?"))return;
+ document.querySelectorAll("#inspectionView input").forEach(e=>{if(e.type==="radio")e.checked=false;else if(e.type!=="file")e.value=""});
+ document.querySelectorAll("#inspectionView textarea").forEach(e=>e.value="");
+ iDate.value=today();iTech.value="Sterling";iOwner.value="Sterling";iOverall.value="Ride Ready";
+ inspectionPhotos={};currentInspectionId=null;
+ document.querySelectorAll("#inspectionView .photo-strip").forEach(e=>e.innerHTML="");
+}
+function newService(key="z500",type="Oil Change"){
+ clearService(false);
+ const b=bikes[key]||bikes.z500;
+ sYear.value=b.year;sMake.value=b.make;sModel.value=b.model;sType.value=type;
+ renderServiceTemplate();showView("service");
+}
+function clearService(ask=true){
+ if(ask&&!confirm("Clear this service record and unsaved photos?"))return;
+ document.querySelectorAll("#serviceView input").forEach(e=>{if(e.type==="checkbox")e.checked=false;else if(e.type!=="file")e.value=""});
+ document.querySelectorAll("#serviceView textarea").forEach(e=>e.value="");
+ sDate.value=today();sTech.value="Sterling";sOwner.value="Sterling";sType.value="Oil Change";sStatus.value="Completed";
+ servicePhotos={before:[],after:[]};currentServiceId=null;
+ beforeStrip.innerHTML="";afterStrip.innerHTML="";renderServiceTemplate();
+}
+
+function renderServiceTemplate(){
+ const type=sType.value;
+ const fields=templates[type]||[];
+ serviceTemplate.innerHTML=`<h3 style="margin:0 0 10px">${type} Details</h3><div class="grid" id="templateGrid"></div>`;
+ const grid=document.getElementById("templateGrid");
+ fields.forEach(f=>{
+  const wrap=document.createElement("div");
+  if(f.type==="check"){
+   wrap.innerHTML=`<label class="check-row"><input data-service-field="${f.id}" type="checkbox"> ${f.label}</label>`;
+  }else if(f.type==="select"){
+   wrap.innerHTML=`<label>${f.label}</label><select data-service-field="${f.id}">${f.options.map(x=>`<option>${x}</option>`).join("")}</select>`;
+  }else if(f.type==="textarea"){
+   wrap.innerHTML=`<label>${f.label}</label><textarea data-service-field="${f.id}"></textarea>`;
+  }else{
+   wrap.innerHTML=`<label>${f.label}</label><input data-service-field="${f.id}">`;
+  }
+  grid.appendChild(wrap);
+ });
+}
+function collectTemplate(){
+ const data={};
+ document.querySelectorAll("[data-service-field]").forEach(e=>data[e.dataset.serviceField]=e.type==="checkbox"?e.checked:e.value);
+ return data;
+}
+function fillTemplate(data){
+ document.querySelectorAll("[data-service-field]").forEach(e=>{
+  if(!(e.dataset.serviceField in (data||{})))return;
+  if(e.type==="checkbox")e.checked=!!data[e.dataset.serviceField];else e.value=data[e.dataset.serviceField];
+ });
+}
+
+function resizeImage(file,max=1500,quality=.82){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onload=()=>{
+   const img=new Image();
+   img.onload=()=>{
+    let w=img.width,h=img.height,scale=Math.min(1,max/Math.max(w,h));
+    w=Math.round(w*scale);h=Math.round(h*scale);
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
+    resolve(c.toDataURL("image/jpeg",quality));
+   };
+   img.onerror=reject;img.src=reader.result;
+  };
+  reader.onerror=reject;reader.readAsDataURL(file);
+ });
+}
+async function filesToPhotos(files){
+ const result=[];
+ for(const f of [...files]){
+  try{result.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),name:f.name||"photo.jpg",data:await resizeImage(f)})}
+  catch(e){alert("One photo could not be added.")}
+ }
+ return result;
+}
+
+async function addInspectionPhotos(id,event){
+ inspectionPhotos[id]=inspectionPhotos[id]||[];
+ inspectionPhotos[id].push(...await filesToPhotos(event.target.files));
+ event.target.value="";renderInspectionPhotos(id);
+}
+function renderInspectionPhotos(id){
+ const strip=document.getElementById(id+"_strip");if(!strip)return;
+ strip.innerHTML=(inspectionPhotos[id]||[]).map((p,n)=>`<div class="photo-wrap"><img class="thumb" src="${p.data}" onclick="openImage('${id}',${n},'inspection')"><button class="remove" onclick="removeInspectionPhoto('${id}',${n})">×</button></div>`).join("");
+}
+function removeInspectionPhoto(id,n){inspectionPhotos[id].splice(n,1);renderInspectionPhotos(id)}
+
+async function addServicePhotos(kind,event){
+ servicePhotos[kind].push(...await filesToPhotos(event.target.files));
+ event.target.value="";renderServicePhotos(kind);
+}
+function renderServicePhotos(kind){
+ const strip=document.getElementById(kind+"Strip");
+ strip.innerHTML=servicePhotos[kind].map((p,n)=>`<div class="photo-wrap"><img class="thumb" src="${p.data}" onclick="openImage('${kind}',${n},'service')"><button class="remove" onclick="removeServicePhoto('${kind}',${n})">×</button></div>`).join("");
+}
+function removeServicePhoto(kind,n){servicePhotos[kind].splice(n,1);renderServicePhotos(kind)}
+
+function openImage(key,n,source){
+ const p=source==="service"?servicePhotos[key][n]:inspectionPhotos[key][n];
+ if(!p)return;modalImage.src=p.data;modalCaption.textContent=p.name||"Photo";photoModal.classList.add("open");
+}
+function openDataImage(data,caption){modalImage.src=data;modalCaption.textContent=caption||"";photoModal.classList.add("open")}
+function closeModal(e){if(e.target===photoModal)forceCloseModal()}
+function forceCloseModal(){photoModal.classList.remove("open");modalImage.src=""}
+
+async function saveInspection(){
+ const rec={id:currentInspectionId||Date.now(),kind:"inspection",version:APP_VERSION,date:iDate.value,technician:iTech.value,owner:iOwner.value,mileage:iMileage.value,year:iYear.value,make:iMake.value,model:iModel.value,purpose:iPurpose.value,overall:iOverall.value,score:iScore.value,recommendations:iRecommendations.value,nextService:iNext.value,checks:{},updatedAt:new Date().toISOString()};
+ Object.entries(inspectionGroups).forEach(([group,items])=>items.forEach(item=>{
+  const id=itemId(group,item),selected=document.querySelector(`input[name="${id}"]:checked`);
+  rec.checks[id]={group,label:item,status:selected?selected.value:"",note:document.getElementById(id+"_note").value,photos:inspectionPhotos[id]||[]};
+ }));
+ try{await putOne("records",rec);currentInspectionId=rec.id;alert("Inspection saved.");showView("history")}
+ catch(e){alert("Could not save. Export a backup if device storage is becoming full.")}
+}
+async function saveService(){
+ const rec={id:currentServiceId||Date.now(),kind:"service",version:APP_VERSION,date:sDate.value,technician:sTech.value,owner:sOwner.value,mileage:sMileage.value,year:sYear.value,make:sMake.value,model:sModel.value,serviceType:sType.value,template:collectTemplate(),concern:sConcern.value,work:sWork.value,parts:sParts.value,measurements:sMeasurements.value,result:sResult.value,lesson:sLesson.value,status:sStatus.value,nextService:sNext.value,beforePhotos:servicePhotos.before,afterPhotos:servicePhotos.after,updatedAt:new Date().toISOString()};
+ try{await putOne("services",rec);currentServiceId=rec.id;alert("Service record saved.");showView("history")}
+ catch(e){alert("Could not save. Export a backup if device storage is becoming full.")}
+}
+
+function setHistoryFilter(filter){
+ historyFilter=filter;
+ ["All","Inspections","Services"].forEach(x=>document.getElementById("filter"+x).classList.toggle("active",x.toLowerCase().replace("inspections","inspection").replace("services","service")===filter));
+ renderHistory();
+}
+async function renderHistory(){
+ const q=(historySearch.value||"").toLowerCase();
+ const inspections=(await getAll("records")).map(x=>({...x,kind:"inspection"}));
+ const services=(await getAll("services")).map(x=>({...x,kind:"service"}));
+ let rows=[...inspections,...services].sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+ if(historyFilter!=="all")rows=rows.filter(x=>x.kind===historyFilter);
+ rows=rows.filter(x=>JSON.stringify(x).toLowerCase().includes(q));
+ if(!rows.length){historyList.innerHTML="<div class='small'>No matching records.</div>";return}
+ historyList.innerHTML=rows.map(x=>{
+  if(x.kind==="service"){
+   const count=(x.beforePhotos?.length||0)+(x.afterPhotos?.length||0);
+   return `<div class="record"><div class="record-head"><div><b>${x.serviceType||"Service"}</b><span class="badge">${x.status||"Saved"}</span><div class="small">${x.year||""} ${x.make||""} ${x.model||""}</div></div><div class="small">${x.date||""}</div></div><div class="small">${x.mileage||"No mileage"} miles • ${count} photo${count===1?"":"s"}${x.lesson?" • Lesson recorded":""}</div><div class="actions"><button class="success" onclick="openService(${x.id})">Open Service</button><button class="danger" onclick="deleteRecord('services',${x.id})">Delete</button></div></div>`;
+  }
+  const count=Object.values(x.checks||{}).reduce((n,c)=>n+(c.photos?.length||0),0);
+  return `<div class="record"><div class="record-head"><div><b>${x.purpose||"Inspection"}</b><span class="badge">${x.overall||"Saved"}</span><div class="small">${x.year||""} ${x.make||""} ${x.model||""}</div></div><div class="small">${x.date||""}</div></div><div class="small">${x.mileage||"No mileage"} miles • ${count} photo${count===1?"":"s"}</div><div class="actions"><button onclick="openInspection(${x.id})">Open Inspection</button><button class="danger" onclick="deleteRecord('records',${x.id})">Delete</button></div></div>`;
+ }).join("");
+}
+async function openInspection(id){
+ const r=await getOne("records",id);if(!r)return;
+ clearInspection(false);currentInspectionId=r.id;
+ const map={iDate:"date",iTech:"technician",iOwner:"owner",iMileage:"mileage",iYear:"year",iMake:"make",iModel:"model",iPurpose:"purpose",iOverall:"overall",iScore:"score",iRecommendations:"recommendations",iNext:"nextService"};
+ Object.entries(map).forEach(([el,key])=>document.getElementById(el).value=r[key]??"");
+ Object.entries(r.checks||{}).forEach(([id,c])=>{
+  document.querySelectorAll(`input[name="${id}"]`).forEach(e=>e.checked=e.value===c.status);
+  const n=document.getElementById(id+"_note");if(n)n.value=c.note||"";
+  inspectionPhotos[id]=c.photos||[];renderInspectionPhotos(id);
+ });
+ showView("inspection");
+}
+async function openService(id){
+ const r=await getOne("services",id);if(!r)return;
+ clearService(false);currentServiceId=r.id;
+ sDate.value=r.date||"";sTech.value=r.technician||"";sOwner.value=r.owner||"";sMileage.value=r.mileage||"";sYear.value=r.year||"";sMake.value=r.make||"";sModel.value=r.model||"";
+ sType.value=r.serviceType||"Custom Service";renderServiceTemplate();fillTemplate(r.template||{});
+ sConcern.value=r.concern||"";sWork.value=r.work||"";sParts.value=r.parts||"";sMeasurements.value=r.measurements||"";sResult.value=r.result||"";sLesson.value=r.lesson||"";sStatus.value=r.status||"Completed";sNext.value=r.nextService||"";
+ servicePhotos={before:r.beforePhotos||[],after:r.afterPhotos||[]};renderServicePhotos("before");renderServicePhotos("after");showView("service");
+}
+async function deleteRecord(storeName,id){
+ if(confirm("Delete this record and all attached photos?")){await deleteOne(storeName,id);renderHistory()}
+}
+
+async function saveGalleryPhoto(event){
+ const file=event.target.files[0];if(!file)return;
+ if(!gTitle.value.trim()){alert("Enter a title first.");event.target.value="";return}
+ const photo=(await filesToPhotos([file]))[0];
+ if(!photo)return;
+ await putOne("refs",{id:Date.now(),category:gCategory.value,title:gTitle.value.trim(),notes:gNotes.value.trim(),photo:photo.data,createdAt:new Date().toISOString()});
+ gTitle.value="";gNotes.value="";event.target.value="";renderGallery();
+}
+async function renderGallery(){
+ const refs=(await getAll("refs")).sort((a,b)=>b.id-a.id);
+ galleryList.innerHTML=refs.length?refs.map(r=>`<div class="record"><img class="ref-photo" src="${r.photo}" onclick='openDataImage(${JSON.stringify(r.photo)},${JSON.stringify(r.category+" — "+r.title)})'><div style="margin-top:8px"><b>${r.title}</b><span class="badge">${r.category}</span></div><div class="small">${r.notes||""}</div><div class="actions"><button class="danger" onclick="deleteGallery(${r.id})">Delete</button></div></div>`).join(""):"<div class='small' style='margin-top:12px'>No reference photos saved.</div>";
+}
+async function deleteGallery(id){if(confirm("Delete this reference photo?")){await deleteOne("refs",id);renderGallery()}}
+
+async function exportBackup(){
+ const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),inspections:await getAll("records"),services:await getAll("services"),references:await getAll("refs")};
+ const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+async function importBackup(event){
+ const file=event.target.files[0];if(!file)return;
+ try{
+  const p=JSON.parse(await file.text());
+  const inspections=p.inspections||p.records||[];
+  const services=p.services||[];
+  const refs=p.references||[];
+  if(!Array.isArray(inspections)||!Array.isArray(services)||!Array.isArray(refs))throw new Error();
+  if(!confirm(`Import ${inspections.length} inspections, ${services.length} services, and ${refs.length} reference photos?`))return;
+  for(const x of inspections)await putOne("records",x);
+  for(const x of services)await putOne("services",x);
+  for(const x of refs)await putOne("refs",x);
+  alert("Backup imported successfully.");showView("history");
+ }catch(e){alert("That is not a valid NightRivet backup.")}
+ event.target.value="";
+}
+
+async function init(){
+ await openDB();
+ buildInspection();
+ iDate.value=sDate.value=today();
+ renderServiceTemplate();
+ if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
+init();
+</script>
+</body>
+</html>

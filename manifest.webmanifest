@@ -1,7 +1,7 @@
 {
   "name": "NightRivet Moto",
   "short_name": "NightRivet",
-  "description": "Motorcycle inspections, photo documentation, service history, references, and backups.",
+  "description": "Motorcycle inspections, service records, repair documentation, before-and-after photos, and workshop references.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
