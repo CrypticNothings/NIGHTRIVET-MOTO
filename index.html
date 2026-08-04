@@ -346,9 +346,12 @@ textarea{min-height:82px;resize:vertical}
   <div class="grid">
    <div><label>Category</label><select id="invCategory"><option>Lubricants</option><option>Chemicals</option><option>Fluids</option><option>Shop Supplies</option><option>Filters & Hardware</option><option>Other</option></select></div>
    <div><label>Item Name</label><input id="invName"></div>
-   <div><label>Quantity on Hand</label><input id="invQty" type="number" min="0" step="0.1" value="0"></div>
-   <div><label>Unit</label><input id="invUnit" placeholder="cans, qt, each"></div>
-   <div><label>Low-Stock Level</label><input id="invLowAt" type="number" min="0" step="0.1" value="1"></div>
+   <div><label>Quantity on Hand</label><input id="invQty" type="number" min="0" step="0.01" value="0"></div>
+   <div><label>Stock Unit</label><input id="invUnit" placeholder="boxes, qt, cans, each"></div>
+   <div><label>Usage Unit</label><input id="invUsageUnit" placeholder="glove, qt, can, each"></div>
+   <div><label>Usage Mode</label><select id="invUsageMode"><option value="decimal">Decimal quantity</option><option value="whole">Whole units only</option><option value="converted">Converted piece count</option></select></div>
+   <div><label>Usage Units per Stock Unit</label><input id="invConversion" type="number" min="0.01" step="0.01" value="1"></div>
+   <div><label>Low-Stock Level</label><input id="invLowAt" type="number" min="0" step="0.01" value="1"></div>
    <div><label>Preferred Brand / Part</label><input id="invBrand"></div>
   </div>
   <div style="margin-top:10px"><label>Notes</label><textarea id="invNotes"></textarea></div>
@@ -361,7 +364,7 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="5.2.1",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
+const APP_VERSION="5.3.0",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
 let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
@@ -410,15 +413,28 @@ async function seedBikes(){
 async function seedInventory(){
  const items=await all("inventory");if(items.length)return;
  const defaults=[
-  ["Lubricants","Chain Lube",0,"cans",1],["Lubricants","Axle Grease",0,"tubs",1],["Lubricants","Moly Paste",0,"tubes",1],["Lubricants","Anti-Seize",0,"tubes",1],["Lubricants","Dielectric Grease",0,"tubes",1],
-  ["Chemicals","Brake Cleaner",0,"cans",2],["Chemicals","Carb Cleaner",0,"cans",1],["Chemicals","Penetrating Oil",0,"cans",1],
-  ["Fluids","Engine Oil",0,"qt",4],["Fluids","Coolant",0,"qt",2],["Fluids","Brake Fluid",0,"bottles",1],["Fluids","Fork Oil",0,"bottles",1],
-  ["Shop Supplies","Shop Towels",0,"rolls",1],["Shop Supplies","Nitrile Gloves",0,"boxes",1],["Shop Supplies","Zip Ties",0,"packs",1],
-  ["Filters & Hardware","Oil Filters",0,"each",1],["Filters & Hardware","Crush Washers",0,"each",5],["Filters & Hardware","Cotter Pins",0,"each",5],["Filters & Hardware","Valve Stems",0,"each",2]
+  ["Lubricants","Chain Lube",0,"cans","can","decimal",1,1],
+  ["Lubricants","Axle Grease",0,"tubs","tub","decimal",1,1],
+  ["Lubricants","Moly Paste",0,"tubes","tube","decimal",1,1],
+  ["Lubricants","Anti-Seize",0,"tubes","tube","decimal",1,1],
+  ["Lubricants","Dielectric Grease",0,"tubes","tube","decimal",1,1],
+  ["Chemicals","Brake Cleaner",0,"cans","can","decimal",1,2],
+  ["Chemicals","Carb Cleaner",0,"cans","can","decimal",1,1],
+  ["Chemicals","Penetrating Oil",0,"cans","can","decimal",1,1],
+  ["Fluids","Engine Oil",0,"qt","qt","decimal",1,4],
+  ["Fluids","Coolant",0,"qt","qt","decimal",1,2],
+  ["Fluids","Brake Fluid",0,"bottles","oz","converted",12,1],
+  ["Fluids","Fork Oil",0,"bottles","oz","converted",32,1],
+  ["Shop Supplies","Shop Towels",0,"rolls","towel","converted",55,1],
+  ["Shop Supplies","Nitrile Gloves",0,"boxes","glove","converted",100,1],
+  ["Shop Supplies","Zip Ties",0,"packs","tie","converted",100,1],
+  ["Filters & Hardware","Oil Filters",0,"each","each","whole",1,1],
+  ["Filters & Hardware","Crush Washers",0,"each","each","whole",1,5],
+  ["Filters & Hardware","Cotter Pins",0,"each","each","whole",1,5],
+  ["Filters & Hardware","Valve Stems",0,"each","each","whole",1,2]
  ];
- for(const x of defaults)await put("inventory",{id:"inv_"+Date.now()+"_"+Math.random(),category:x[0],name:x[1],qty:x[2],unit:x[3],lowAt:x[4],brand:"",notes:"",createdAt:new Date().toISOString()});
+ for(const x of defaults)await put("inventory",{id:"inv_"+Date.now()+"_"+Math.random(),category:x[0],name:x[1],qty:x[2],unit:x[3],usageUnit:x[4],usageMode:x[5],conversion:x[6],lowAt:x[7],brand:"",notes:"",createdAt:new Date().toISOString()});
 }
-
 
 async function seedReminders(){
  const existing=await all("reminders");if(existing.length)return;
@@ -548,6 +564,39 @@ async function completeReminder(id,mileage=null,date=null){const r=await one("re
 async function startServiceFromReminder(id){const r=await one("reminders",id);if(!r)return;await newService(r.bikeId,r.serviceType||"Custom Service");sConcern.value=`Scheduled maintenance: ${r.name}`;sessionStorage.setItem("activeReminderId",id)}
 async function renderProfileMaintenance(bikeId){const bike=await one("bikes",bikeId);let reminders=(await all("reminders")).filter(x=>x.bikeId===bikeId).map(r=>({r,s:reminderState(r,bike?.mileage||0)})).sort((a,b)=>(b.s.overdue-a.s.overdue)||(b.s.dueSoon-a.s.dueSoon)||a.r.name.localeCompare(b.r.name));if(!reminders.length){profileMaintenanceSummary.innerHTML="<div class='small'>No maintenance reminders yet.</div>";return}profileMaintenanceSummary.innerHTML=reminders.slice(0,6).map(({r,s})=>{let text="";if(s.mileageRemaining!==null)text=s.mileageRemaining<0?`${Math.abs(s.mileageRemaining)} miles overdue`:`${s.mileageRemaining} miles remaining`;else if(s.dateRemaining!==null)text=s.dateRemaining<0?`${Math.abs(s.dateRemaining)} days overdue`:`${s.dateRemaining} days remaining`;else text="Not started";return `<div class="dashboard-alert"><div><b>${r.name}</b><div class="small">${text}</div></div><div class="${s.cls}"><b>${s.label}</b></div></div>`}).join("")}
 
+async function migrateInventory20(){
+ const items=await all("inventory");
+ for(const x of items){
+  let changed=false;
+  if(!x.usageMode){
+   const n=(x.name||"").toLowerCase();
+   if(n.includes("glove")){x.usageMode="converted";x.usageUnit="glove";x.conversion=100}
+   else if(n.includes("towel")){x.usageMode="converted";x.usageUnit="towel";x.conversion=55}
+   else if(n.includes("zip tie")){x.usageMode="converted";x.usageUnit="tie";x.conversion=100}
+   else if(n.includes("oil")&&x.unit==="qt"){x.usageMode="decimal";x.usageUnit="qt";x.conversion=1}
+   else if(["each","filter","washer","pin","stem"].some(k=>(x.unit||"").toLowerCase().includes(k)||n.includes(k))){x.usageMode="whole";x.usageUnit=x.unit||"each";x.conversion=1}
+   else{x.usageMode="decimal";x.usageUnit=x.unit||"unit";x.conversion=1}
+   changed=true;
+  }
+  if(!x.usageUnit){x.usageUnit=x.unit||"unit";changed=true}
+  if(!x.conversion||Number(x.conversion)<=0){x.conversion=1;changed=true}
+  if(changed)await put("inventory",x);
+ }
+}
+function displayInventory(item){
+ const qty=Number(item.qty||0),mode=item.usageMode||"decimal",conv=Math.max(.01,Number(item.conversion||1));
+ if(mode==="converted"){
+  const pieces=Math.round(qty*conv*100)/100;
+  return `${pieces} ${item.usageUnit||"units"} (about ${qty.toFixed(qty%1?2:0)} ${item.unit||"stock units"})`;
+ }
+ return `${qty.toFixed(qty%1?2:0)} ${item.unit||item.usageUnit||""}`;
+}
+function usageStep(item){return (item.usageMode||"decimal")==="whole"?"1":"0.01"}
+function usageToStock(item,used){
+ const conv=Math.max(.01,Number(item.conversion||1));
+ return (item.usageMode||"decimal")==="converted"?Number(used||0)/conv:Number(used||0);
+}
+
 function stockState(item){const q=Number(item.qty||0),low=Number(item.lowAt||0);if(q<=0)return{label:"OUT",cls:"out"};if(q<=low)return{label:"LOW",cls:"low"};return{label:"IN STOCK",cls:"ok"}}
 function setInventoryFilter(f){inventoryFilter=f;["All","Low","Shopping"].forEach(x=>document.getElementById("inv"+x).classList.toggle("active",x.toLowerCase()===f));renderInventory()}
 async function renderInventory(){
@@ -555,16 +604,16 @@ async function renderInventory(){
  if(inventoryFilter==="low")items=items.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0));
  if(inventoryFilter==="shopping"){items=items.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0));inventoryList.innerHTML=items.length?items.sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const need=Math.max(1,Number(x.lowAt||0)+1-Number(x.qty||0));return `<div class="shopping-item"><div><b>${x.name}</b><div class="small">${x.qty||0} ${x.unit||""} on hand • Suggested buy: ${need} ${x.unit||""}</div></div><button class="success" onclick="adjustInventory('${x.id}',${need})">Bought</button></div>`}).join(""):"<div class='small' style='margin-top:12px'>Nothing is currently low.</div>";return}
  const groups={};items.forEach(x=>(groups[x.category||"Other"]=groups[x.category||"Other"]||[]).push(x));
- const cats=Object.keys(groups).sort();inventoryList.innerHTML=cats.length?cats.map(cat=>`<h3 class="inventory-category">${cat}</h3>`+groups[cat].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const s=stockState(x);return `<div class="inventory-row"><div class="inventory-top"><div><div class="inventory-name">${x.name}</div><div class="small">${x.brand||""}${x.notes?` • ${x.notes}`:""}</div></div><div class="${s.cls}"><b>${s.label}</b></div></div><div class="stock-controls"><button onclick="adjustInventory('${x.id}',-1)">−</button><div class="stock-number">${Number(x.qty||0).toFixed(Number(x.qty||0)%1?1:0)} ${x.unit||""}</div><button onclick="adjustInventory('${x.id}',1)">+</button><button class="blue" onclick="openInventoryEditor('${x.id}')">Edit</button></div></div>`}).join("")).join(""):"<div class='small' style='margin-top:12px'>No inventory items found.</div>"
+ const cats=Object.keys(groups).sort();inventoryList.innerHTML=cats.length?cats.map(cat=>`<h3 class="inventory-category">${cat}</h3>`+groups[cat].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const s=stockState(x);return `<div class="inventory-row"><div class="inventory-top"><div><div class="inventory-name">${x.name}</div><div class="small">${x.brand||""}${x.notes?` • ${x.notes}`:""}</div></div><div class="${s.cls}"><b>${s.label}</b></div></div><div class="stock-controls"><button onclick="adjustInventory('${x.id}',-1)">−</button><div class="stock-number">${displayInventory(x)}</div><button onclick="adjustInventory('${x.id}',1)">+</button><button class="blue" onclick="openInventoryEditor('${x.id}')">Edit</button></div></div>`}).join("")).join(""):"<div class='small' style='margin-top:12px'>No inventory items found.</div>"
 }
 async function adjustInventory(id,amount){const x=await one("inventory",id);if(!x)return;x.qty=Math.max(0,Number(x.qty||0)+Number(amount||0));x.updatedAt=new Date().toISOString();await put("inventory",x);renderInventory();renderServiceInventoryUsage()}
-function openInventoryEditor(id=null){inventoryModal.classList.add("open");invId.value="";invCategory.value="Lubricants";invName.value="";invQty.value="0";invUnit.value="";invLowAt.value="1";invBrand.value="";invNotes.value="";deleteInventoryButton.style.display=id?"block":"none";inventoryEditorTitle.textContent=id?"Edit Inventory Item":"Add Inventory Item";if(id)one("inventory",id).then(x=>{invId.value=x.id;invCategory.value=x.category||"Other";invName.value=x.name||"";invQty.value=x.qty??0;invUnit.value=x.unit||"";invLowAt.value=x.lowAt??1;invBrand.value=x.brand||"";invNotes.value=x.notes||""})}
+function openInventoryEditor(id=null){inventoryModal.classList.add("open");invId.value="";invCategory.value="Lubricants";invName.value="";invQty.value="0";invUnit.value="";invUsageUnit.value="";invUsageMode.value="decimal";invConversion.value="1";invLowAt.value="1";invBrand.value="";invNotes.value="";deleteInventoryButton.style.display=id?"block":"none";inventoryEditorTitle.textContent=id?"Edit Inventory Item":"Add Inventory Item";if(id)one("inventory",id).then(x=>{invId.value=x.id;invCategory.value=x.category||"Other";invName.value=x.name||"";invQty.value=x.qty??0;invUnit.value=x.unit||"";invUsageUnit.value=x.usageUnit||x.unit||"";invUsageMode.value=x.usageMode||"decimal";invConversion.value=x.conversion||1;invLowAt.value=x.lowAt??1;invBrand.value=x.brand||"";invNotes.value=x.notes||""})}
 function closeInventoryEditor(){inventoryModal.classList.remove("open")}
-async function saveInventoryItem(){if(!invName.value.trim()){alert("Enter an item name.");return}const id=invId.value||("inv_"+Date.now()),old=invId.value?await one("inventory",id):null;await put("inventory",{id,category:invCategory.value,name:invName.value.trim(),qty:Math.max(0,Number(invQty.value||0)),unit:invUnit.value.trim(),lowAt:Math.max(0,Number(invLowAt.value||0)),brand:invBrand.value.trim(),notes:invNotes.value.trim(),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()});closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}
+async function saveInventoryItem(){if(!invName.value.trim()){alert("Enter an item name.");return}const id=invId.value||("inv_"+Date.now()),old=invId.value?await one("inventory",id):null;await put("inventory",{id,category:invCategory.value,name:invName.value.trim(),qty:Math.max(0,Number(invQty.value||0)),unit:invUnit.value.trim(),usageUnit:invUsageUnit.value.trim()||invUnit.value.trim()||"unit",usageMode:invUsageMode.value,conversion:Math.max(.01,Number(invConversion.value||1)),lowAt:Math.max(0,Number(invLowAt.value||0)),brand:invBrand.value.trim(),notes:invNotes.value.trim(),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()});closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}
 async function deleteInventoryItem(){const id=invId.value;if(id&&confirm("Delete this inventory item?")){await del("inventory",id);closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}}
-async function renderServiceInventoryUsage(savedUsage={}){const items=(await all("inventory")).sort((a,b)=>(a.category+a.name).localeCompare(b.category+b.name));serviceInventoryUsage.innerHTML=items.length?items.map(x=>`<div class="usage-row"><div><b>${x.name}</b><div class="small">${x.qty||0} ${x.unit||""} currently on hand</div></div><div><label>Used</label><input data-inventory-use="${x.id}" type="number" min="0" step="0.1" value="${Number(savedUsage[x.id]||0)||""}" placeholder="0"></div></div>`).join(""):"<div class='small' style='margin-top:10px'>No inventory items yet.</div>"}
+async function renderServiceInventoryUsage(savedUsage={}){const items=(await all("inventory")).sort((a,b)=>(a.category+a.name).localeCompare(b.category+b.name));serviceInventoryUsage.innerHTML=items.length?items.map(x=>`<div class="usage-row"><div><b>${x.name}</b><div class="small">${displayInventory(x)} currently on hand</div></div><div><label>Used (${x.usageUnit||x.unit||"unit"})</label><input data-inventory-use="${x.id}" type="number" min="0" step="${usageStep(x)}" value="${Number(savedUsage[x.id]||0)||""}" placeholder="0"></div></div>`).join(""):"<div class='small' style='margin-top:10px'>No inventory items yet.</div>"}
 function collectInventoryUsage(){const d={};document.querySelectorAll("[data-inventory-use]").forEach(e=>{const n=Number(e.value||0);if(n>0)d[e.dataset.inventoryUse]=n});return d}
-async function applyInventoryUsage(newUsage,oldUsage={}){const ids=new Set([...Object.keys(newUsage||{}),...Object.keys(oldUsage||{})]);for(const id of ids){const item=await one("inventory",id);if(!item)continue;const delta=Number(newUsage?.[id]||0)-Number(oldUsage?.[id]||0);item.qty=Math.max(0,Number(item.qty||0)-delta);item.updatedAt=new Date().toISOString();await put("inventory",item)}}
+async function applyInventoryUsage(newUsage,oldUsage={}){const ids=new Set([...Object.keys(newUsage||{}),...Object.keys(oldUsage||{})]);for(const id of ids){const item=await one("inventory",id);if(!item)continue;const delta=usageToStock(item,Number(newUsage?.[id]||0))-usageToStock(item,Number(oldUsage?.[id]||0));item.qty=Math.max(0,Number(item.qty||0)-delta);item.updatedAt=new Date().toISOString();await put("inventory",item)}}
 
 async function exportBackup(){const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs"),inventory:await all("inventory"),reminders:await all("reminders")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[],v=p.inventory||[],m=p.reminders||[];if(!confirm(`Import ${b.length} motorcycles, ${i.length} inspections, ${s.length} services, ${r.length} reference photos, ${v.length} inventory items, and ${m.length} reminders?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);for(const x of v)await put("inventory",x);for(const x of m)await put("reminders",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid NightRivet backup.")}e.target.value=""}
@@ -582,7 +631,7 @@ async function migrateUnlinkedRecords(){
  }
 }
 
-async function init(){await openDB();await seedBikes();await seedInventory();await seedReminders();await migrateUnlinkedRecords();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();await renderServiceInventoryUsage();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+async function init(){await openDB();await seedBikes();await seedInventory();await migrateInventory20();await seedReminders();await migrateUnlinkedRecords();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();await renderServiceInventoryUsage();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
 init();
 </script>
 </body>
