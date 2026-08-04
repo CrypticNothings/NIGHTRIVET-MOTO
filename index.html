@@ -364,7 +364,7 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="5.3.0",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
+const APP_VERSION="5.3.1",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
 let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
@@ -529,7 +529,13 @@ async function saveInspection(){
 async function saveService(){
  const bike=await one("bikes",sBikeId.value),old=currentServiceId?await one("services",currentServiceId):null,usage=collectInventoryUsage();
  const rec={id:currentServiceId||Date.now(),bikeId:sBikeId.value,kind:"service",version:APP_VERSION,date:sDate.value,technician:sTech.value,owner:sOwner.value,mileage:sMileage.value,serviceType:sType.value,template:collectTemplate(),concern:sConcern.value,work:sWork.value,parts:sParts.value,measurements:sMeasurements.value,result:sResult.value,lesson:sLesson.value,status:sStatus.value,nextService:sNext.value,beforePhotos:servicePhotos.before,afterPhotos:servicePhotos.after,inventoryUsage:usage,updatedAt:new Date().toISOString()};
- await applyInventoryUsage(usage,old?.inventoryUsage||{});await put("services",rec);if(bike&&sMileage.value){bike.mileage=sMileage.value;await put("bikes",bike)}currentServiceId=rec.id;const activeReminderId=sessionStorage.getItem("activeReminderId");if(activeReminderId){await completeReminder(activeReminderId,sMileage.value||bike?.mileage||"",sDate.value||today());sessionStorage.removeItem("activeReminderId")}alert("Service record saved and inventory updated.");openProfile(rec.bikeId)
+ try{
+  await applyInventoryUsage(usage,old?.inventoryUsage||{});
+ }catch(err){
+  alert(err.message||"Inventory could not be updated.");
+  return;
+ }
+ await put("services",rec);if(bike&&sMileage.value){bike.mileage=sMileage.value;await put("bikes",bike)}currentServiceId=rec.id;const activeReminderId=sessionStorage.getItem("activeReminderId");if(activeReminderId){await completeReminder(activeReminderId,sMileage.value||bike?.mileage||"",sDate.value||today());sessionStorage.removeItem("activeReminderId")}alert("Service record saved and inventory updated.");openProfile(rec.bikeId)
 }
 
 function setHistoryFilter(f){historyFilter=f;["All","Inspection","Service"].forEach(x=>document.getElementById("filter"+x).classList.toggle("active",x.toLowerCase()===f));renderHistory()}
@@ -567,17 +573,36 @@ async function renderProfileMaintenance(bikeId){const bike=await one("bikes",bik
 async function migrateInventory20(){
  const items=await all("inventory");
  for(const x of items){
+  const n=(x.name||"").toLowerCase();
   let changed=false;
-  if(!x.usageMode){
-   const n=(x.name||"").toLowerCase();
-   if(n.includes("glove")){x.usageMode="converted";x.usageUnit="glove";x.conversion=100}
-   else if(n.includes("towel")){x.usageMode="converted";x.usageUnit="towel";x.conversion=55}
-   else if(n.includes("zip tie")){x.usageMode="converted";x.usageUnit="tie";x.conversion=100}
-   else if(n.includes("oil")&&x.unit==="qt"){x.usageMode="decimal";x.usageUnit="qt";x.conversion=1}
-   else if(["each","filter","washer","pin","stem"].some(k=>(x.unit||"").toLowerCase().includes(k)||n.includes(k))){x.usageMode="whole";x.usageUnit=x.unit||"each";x.conversion=1}
-   else{x.usageMode="decimal";x.usageUnit=x.unit||"unit";x.conversion=1}
+
+  // Force common package-to-piece items into the correct conversion model,
+  // even if an earlier app version already assigned an incorrect mode.
+  if(n.includes("glove")){
+   if(x.usageMode!=="converted"||x.usageUnit!=="glove"||Number(x.conversion)!==100){
+    x.usageMode="converted";x.usageUnit="glove";x.conversion=100;changed=true;
+   }
+  }else if(n.includes("towel")){
+   if(x.usageMode!=="converted"||x.usageUnit!=="towel"||Number(x.conversion)<=1){
+    x.usageMode="converted";x.usageUnit="towel";x.conversion=55;changed=true;
+   }
+  }else if(n.includes("zip tie")){
+   if(x.usageMode!=="converted"||x.usageUnit!=="tie"||Number(x.conversion)<=1){
+    x.usageMode="converted";x.usageUnit="tie";x.conversion=100;changed=true;
+   }
+  }else if(n.includes("engine oil")||((x.unit||"").toLowerCase()==="qt"&&n.includes("oil"))){
+   if(x.usageMode!=="decimal"||x.usageUnit!=="qt"||Number(x.conversion)!==1){
+    x.usageMode="decimal";x.usageUnit="qt";x.conversion=1;changed=true;
+   }
+  }else if(!x.usageMode){
+   if(["each","filter","washer","pin","stem"].some(k=>(x.unit||"").toLowerCase().includes(k)||n.includes(k))){
+    x.usageMode="whole";x.usageUnit=x.unit||"each";x.conversion=1;
+   }else{
+    x.usageMode="decimal";x.usageUnit=x.unit||"unit";x.conversion=1;
+   }
    changed=true;
   }
+
   if(!x.usageUnit){x.usageUnit=x.unit||"unit";changed=true}
   if(!x.conversion||Number(x.conversion)<=0){x.conversion=1;changed=true}
   if(changed)await put("inventory",x);
@@ -613,7 +638,19 @@ async function saveInventoryItem(){if(!invName.value.trim()){alert("Enter an ite
 async function deleteInventoryItem(){const id=invId.value;if(id&&confirm("Delete this inventory item?")){await del("inventory",id);closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}}
 async function renderServiceInventoryUsage(savedUsage={}){const items=(await all("inventory")).sort((a,b)=>(a.category+a.name).localeCompare(b.category+b.name));serviceInventoryUsage.innerHTML=items.length?items.map(x=>`<div class="usage-row"><div><b>${x.name}</b><div class="small">${displayInventory(x)} currently on hand</div></div><div><label>Used (${x.usageUnit||x.unit||"unit"})</label><input data-inventory-use="${x.id}" type="number" min="0" step="${usageStep(x)}" value="${Number(savedUsage[x.id]||0)||""}" placeholder="0"></div></div>`).join(""):"<div class='small' style='margin-top:10px'>No inventory items yet.</div>"}
 function collectInventoryUsage(){const d={};document.querySelectorAll("[data-inventory-use]").forEach(e=>{const n=Number(e.value||0);if(n>0)d[e.dataset.inventoryUse]=n});return d}
-async function applyInventoryUsage(newUsage,oldUsage={}){const ids=new Set([...Object.keys(newUsage||{}),...Object.keys(oldUsage||{})]);for(const id of ids){const item=await one("inventory",id);if(!item)continue;const delta=usageToStock(item,Number(newUsage?.[id]||0))-usageToStock(item,Number(oldUsage?.[id]||0));item.qty=Math.max(0,Number(item.qty||0)-delta);item.updatedAt=new Date().toISOString();await put("inventory",item)}}
+async function applyInventoryUsage(newUsage,oldUsage={}){
+ const ids=new Set([...Object.keys(newUsage||{}),...Object.keys(oldUsage||{})]);
+ for(const id of ids){
+  const item=await one("inventory",id);if(!item)continue;
+  const delta=usageToStock(item,Number(newUsage?.[id]||0))-usageToStock(item,Number(oldUsage?.[id]||0));
+  const next=Number(item.qty||0)-delta;
+  if(next<-.0001){
+   throw new Error(`${item.name}: usage exceeds available inventory. Available: ${displayInventory(item)}.`);
+  }
+  item.qty=Math.max(0,next);item.updatedAt=new Date().toISOString();
+  await put("inventory",item);
+ }
+}
 
 async function exportBackup(){const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs"),inventory:await all("inventory"),reminders:await all("reminders")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[],v=p.inventory||[],m=p.reminders||[];if(!confirm(`Import ${b.length} motorcycles, ${i.length} inspections, ${s.length} services, ${r.length} reference photos, ${v.length} inventory items, and ${m.length} reminders?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);for(const x of v)await put("inventory",x);for(const x of m)await put("reminders",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid NightRivet backup.")}e.target.value=""}
