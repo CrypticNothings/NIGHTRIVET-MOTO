@@ -21,7 +21,7 @@ button,input,textarea,select{font:inherit}
 .app{max-width:1040px;margin:auto;padding:14px 14px 76px}
 .hero{display:flex;align-items:center;gap:14px;padding:15px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#19191e,#0b0b0e);box-shadow:var(--shadow)}
 .hero img{width:70px;height:70px;border-radius:17px}.hero h1{margin:0;font-size:27px}.tag{color:var(--muted);margin-top:5px}
-.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:12px 0}
+.nav{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:12px 0}
 button{border:0;border-radius:11px;padding:12px 10px;font-size:14px;font-weight:700;color:#fff;background:#292930;cursor:pointer}
 button.active,.primary{background:var(--red)}button.success{background:var(--green)}button.warn{background:var(--amber)}button.danger{background:var(--danger)}button.blue{background:var(--blue)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;margin:12px 0}
@@ -68,6 +68,17 @@ textarea{min-height:82px;resize:vertical}
 .thumb{width:90px;height:90px;object-fit:cover;border-radius:9px;border:1px solid #50505a}.remove{position:absolute;right:-4px;top:-4px;width:25px;height:25px;border-radius:50%;padding:0;background:#8e111b}
 .photo-zone{border:1px dashed #4b4b56;border-radius:12px;padding:11px;margin-top:10px}.photo-zone h3{font-size:15px;margin:0 0 7px}
 .tabs{display:flex;gap:7px;overflow-x:auto;margin-bottom:10px}.tabs button{white-space:nowrap;flex:0 0 auto}
+
+.inventory-row{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0}
+.inventory-top{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
+.inventory-name{font-weight:800;font-size:16px}
+.stock-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.stock-controls button{padding:9px 13px}
+.stock-number{min-width:78px;text-align:center;font-weight:800;font-size:17px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#101015}
+.low{color:#f0c85e}.out{color:#ff6670}.ok{color:#77d395}
+.inventory-category{margin-top:16px;font-size:17px;border-bottom:1px solid var(--line);padding-bottom:7px}
+.usage-row{display:grid;grid-template-columns:1fr 100px;gap:8px;align-items:end;margin:8px 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:#101015}
+.shopping-item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#101015;border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
 .modal{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.open{display:flex}
 .modal-box{max-width:900px;width:100%;max-height:94vh;overflow:auto;background:#111116;border:1px solid var(--line);border-radius:14px;padding:12px}.modal img{width:100%;height:auto;border-radius:10px}.modal-close{position:sticky;top:0;float:right;background:var(--danger);z-index:2}
 @media(max-width:760px){
@@ -94,6 +105,7 @@ textarea{min-height:82px;resize:vertical}
  <button id="navService" onclick="startServiceFromSelected()">Service</button>
  <button id="navHistory" onclick="showView('history')">History</button>
  <button id="navGallery" onclick="showView('gallery')">Gallery</button>
+ <button id="navInventory" onclick="showView('inventory')">Inventory</button>
 </nav>
 
 <section id="garageView">
@@ -198,6 +210,12 @@ textarea{min-height:82px;resize:vertical}
    <div class="actions"><button onclick="afterInput.click()">Choose After Photo(s)</button></div><div id="afterStrip" class="photo-strip"></div>
   </div>
 
+  <div class="card" style="margin:12px 0 0;background:#101015">
+   <h2 class="title">Consumables Used</h2>
+   <div class="small">Enter what this job actually consumed. Saving the service automatically deducts it from inventory.</div>
+   <div id="serviceInventoryUsage"></div>
+  </div>
+
   <div class="grid" style="margin-top:10px">
    <div><label>Job Status</label><select id="sStatus"><option>Completed</option><option>In Progress</option><option>Waiting on Parts</option><option>Needs Recheck</option></select></div>
    <div><label>Next Service / Follow-up Due</label><input id="sNext"></div>
@@ -233,6 +251,23 @@ textarea{min-height:82px;resize:vertical}
   <input id="importInput" class="file" type="file" accept=".json,application/json" onchange="importBackup(event)">
  </div>
 </section>
+
+<section id="inventoryView" class="hidden">
+ <div class="card">
+  <h2 class="title">Consumables Inventory</h2>
+  <div class="grid">
+   <input id="inventorySearch" placeholder="Search inventory" oninput="renderInventory()">
+   <button class="primary" onclick="openInventoryEditor()">+ Add Inventory Item</button>
+  </div>
+  <div class="tabs">
+   <button id="invAll" class="active" onclick="setInventoryFilter('all')">All</button>
+   <button id="invLow" onclick="setInventoryFilter('low')">Low / Out</button>
+   <button id="invShopping" onclick="setInventoryFilter('shopping')">Shopping List</button>
+  </div>
+  <div id="inventoryList"></div>
+ </div>
+</section>
+
 </div>
 
 <div id="bikeModal" class="modal">
@@ -257,13 +292,32 @@ textarea{min-height:82px;resize:vertical}
  </div>
 </div>
 
+
+<div id="inventoryModal" class="modal">
+ <div class="modal-box">
+  <button class="modal-close" onclick="closeInventoryEditor()">Close</button>
+  <h2 id="inventoryEditorTitle">Add Inventory Item</h2>
+  <input id="invId" type="hidden">
+  <div class="grid">
+   <div><label>Category</label><select id="invCategory"><option>Lubricants</option><option>Chemicals</option><option>Fluids</option><option>Shop Supplies</option><option>Filters & Hardware</option><option>Other</option></select></div>
+   <div><label>Item Name</label><input id="invName"></div>
+   <div><label>Quantity on Hand</label><input id="invQty" type="number" min="0" step="0.1" value="0"></div>
+   <div><label>Unit</label><input id="invUnit" placeholder="cans, qt, each"></div>
+   <div><label>Low-Stock Level</label><input id="invLowAt" type="number" min="0" step="0.1" value="1"></div>
+   <div><label>Preferred Brand / Part</label><input id="invBrand"></div>
+  </div>
+  <div style="margin-top:10px"><label>Notes</label><textarea id="invNotes"></textarea></div>
+  <div class="actions"><button class="success" onclick="saveInventoryItem()">Save Item</button><button id="deleteInventoryButton" class="danger" onclick="deleteInventoryItem()">Delete Item</button></div>
+ </div>
+</div>
+
 <div id="photoModal" class="modal" onclick="closePhotoModal(event)">
  <div class="modal-box"><button class="modal-close" onclick="forceClosePhotoModal()">Close</button><img id="modalImage"><div id="modalCaption" class="small" style="margin-top:8px"></div></div>
 </div>
 
 <script>
-const APP_VERSION="5.0.0",DB_NAME="NightRivetMotoDB",DB_VERSION=3;
-let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all";
+const APP_VERSION="5.1.0",DB_NAME="NightRivetMotoDB",DB_VERSION=4;
+let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
 const inspectionGroups={
@@ -287,7 +341,7 @@ const templates={
 
 function today(){return new Date().toISOString().slice(0,10)}
 function itemId(s,i){return(s+"_"+i).toLowerCase().replace(/[^a-z0-9]+/g,"_")}
-function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("records"))d.createObjectStore("records",{keyPath:"id"});if(!d.objectStoreNames.contains("refs"))d.createObjectStore("refs",{keyPath:"id"});if(!d.objectStoreNames.contains("services"))d.createObjectStore("services",{keyPath:"id"});if(!d.objectStoreNames.contains("bikes"))d.createObjectStore("bikes",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>reject(r.error)})}
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("records"))d.createObjectStore("records",{keyPath:"id"});if(!d.objectStoreNames.contains("refs"))d.createObjectStore("refs",{keyPath:"id"});if(!d.objectStoreNames.contains("services"))d.createObjectStore("services",{keyPath:"id"});if(!d.objectStoreNames.contains("bikes"))d.createObjectStore("bikes",{keyPath:"id"});if(!d.objectStoreNames.contains("inventory"))d.createObjectStore("inventory",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>reject(r.error)})}
 function os(name,mode="readonly"){return db.transaction(name,mode).objectStore(name)}
 function all(name){return new Promise((res,rej)=>{const r=os(name).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
 function one(name,id){return new Promise((res,rej)=>{const r=os(name).get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
@@ -295,9 +349,9 @@ function put(name,val){return new Promise((res,rej)=>{const r=os(name,"readwrite
 function del(name,id){return new Promise((res,rej)=>{const r=os(name,"readwrite").delete(id);r.onsuccess=res;r.onerror=()=>rej(r.error)})}
 
 function showView(name){
- ["garage","profile","inspection","service","history","gallery"].forEach(v=>document.getElementById(v+"View").classList.toggle("hidden",v!==name));
- ["Garage","Inspection","Service","History","Gallery"].forEach(v=>document.getElementById("nav"+v).classList.toggle("active",v.toLowerCase()===name));
- if(name==="garage")renderGarage();if(name==="history")renderHistory();if(name==="gallery")renderGallery();
+ ["garage","profile","inspection","service","history","gallery","inventory"].forEach(v=>document.getElementById(v+"View").classList.toggle("hidden",v!==name));
+ ["Garage","Inspection","Service","History","Gallery","Inventory"].forEach(v=>document.getElementById("nav"+v).classList.toggle("active",v.toLowerCase()===name));
+ if(name==="garage")renderGarage();if(name==="history")renderHistory();if(name==="gallery")renderGallery();if(name==="inventory")renderInventory();
  scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -305,6 +359,19 @@ async function seedBikes(){
  const bikes=await all("bikes");if(bikes.length)return;
  await put("bikes",{id:"z500",ownership:"Personal",status:"Ride Ready",year:"2024",make:"Kawasaki",model:"Z500 SE ABS",mileage:"",owner:"Sterling",phone:"",email:"",vin:"",goal:"Complete Tallahassee Ride Ready inspection",photo:"",createdAt:new Date().toISOString()});
  await put("bikes",{id:"vulcan",ownership:"Personal",status:"Project",year:"2005",make:"Kawasaki",model:"Vulcan 500",mileage:"",owner:"Sterling",phone:"",email:"",vin:"",goal:"Establish electrical baseline and revive the fuel system",photo:"",createdAt:new Date().toISOString()});
+}
+
+
+async function seedInventory(){
+ const items=await all("inventory");if(items.length)return;
+ const defaults=[
+  ["Lubricants","Chain Lube",0,"cans",1],["Lubricants","Axle Grease",0,"tubs",1],["Lubricants","Moly Paste",0,"tubes",1],["Lubricants","Anti-Seize",0,"tubes",1],["Lubricants","Dielectric Grease",0,"tubes",1],
+  ["Chemicals","Brake Cleaner",0,"cans",2],["Chemicals","Carb Cleaner",0,"cans",1],["Chemicals","Penetrating Oil",0,"cans",1],
+  ["Fluids","Engine Oil",0,"qt",4],["Fluids","Coolant",0,"qt",2],["Fluids","Brake Fluid",0,"bottles",1],["Fluids","Fork Oil",0,"bottles",1],
+  ["Shop Supplies","Shop Towels",0,"rolls",1],["Shop Supplies","Nitrile Gloves",0,"boxes",1],["Shop Supplies","Zip Ties",0,"packs",1],
+  ["Filters & Hardware","Oil Filters",0,"each",1],["Filters & Hardware","Crush Washers",0,"each",5],["Filters & Hardware","Cotter Pins",0,"each",5],["Filters & Hardware","Valve Stems",0,"each",2]
+ ];
+ for(const x of defaults)await put("inventory",{id:"inv_"+Date.now()+"_"+Math.random(),category:x[0],name:x[1],qty:x[2],unit:x[3],lowAt:x[4],brand:"",notes:"",createdAt:new Date().toISOString()});
 }
 
 async function bikeOptions(){
@@ -361,7 +428,7 @@ async function newInspection(id){
  clearInspection(false);await bikeOptions();iBikeId.value=id;const b=await one("bikes",id);if(b){iOwner.value=b.owner||"";iMileage.value=b.mileage||"";iPurpose.value=b.ownership==="Customer"?"Customer motorcycle inspection":"Ride Ready inspection"}showView("inspection")
 }
 async function newService(id,type="Oil Change"){
- clearService(false);await bikeOptions();sBikeId.value=id;const b=await one("bikes",id);if(b){sOwner.value=b.owner||"";sMileage.value=b.mileage||""}sType.value=type;renderServiceTemplate();showView("service")
+ clearService(false);await bikeOptions();sBikeId.value=id;const b=await one("bikes",id);if(b){sOwner.value=b.owner||"";sMileage.value=b.mileage||""}sType.value=type;renderServiceTemplate();await renderServiceInventoryUsage();showView("service")
 }
 
 function buildInspection(){
@@ -369,7 +436,7 @@ function buildInspection(){
  Object.entries(inspectionGroups).forEach(([group,items])=>{const card=document.createElement("div");card.className="card";card.innerHTML=`<h2 class="title">${group}</h2>`;items.forEach(item=>{const id=itemId(group,item),row=document.createElement("div");row.className="item";row.innerHTML=`<div class="item-name">${item}</div><div class="status-row"><label class="status"><input type="radio" name="${id}" value="Pass">Pass</label><label class="status"><input type="radio" name="${id}" value="Monitor">Monitor</label><label class="status"><input type="radio" name="${id}" value="Attention">Attention</label></div><div class="item-tools"><div><label>Notes / Measurement</label><input id="${id}_note"></div><div><input id="${id}_input" class="file" type="file" accept="image/*" multiple onchange="addInspectionPhotos('${id}',event)"><button onclick="document.getElementById('${id}_input').click()">Choose Photo(s)</button></div></div><div id="${id}_strip" class="photo-strip"></div>`;card.appendChild(row)});inspectionSections.appendChild(card)})
 }
 function clearInspection(ask=true){if(ask&&!confirm("Clear this inspection and unsaved photos?"))return;document.querySelectorAll("#inspectionView input").forEach(e=>{if(e.type==="radio")e.checked=false;else if(e.type!=="file")e.value=""});document.querySelectorAll("#inspectionView textarea").forEach(e=>e.value="");iDate.value=today();iTech.value="Sterling";iOverall.value="Ride Ready";inspectionPhotos={};currentInspectionId=null;document.querySelectorAll("#inspectionView .photo-strip").forEach(e=>e.innerHTML="")}
-function clearService(ask=true){if(ask&&!confirm("Clear this service record and unsaved photos?"))return;document.querySelectorAll("#serviceView input").forEach(e=>{if(e.type==="checkbox")e.checked=false;else if(e.type!=="file")e.value=""});document.querySelectorAll("#serviceView textarea").forEach(e=>e.value="");sDate.value=today();sTech.value="Sterling";sType.value="Oil Change";sStatus.value="Completed";servicePhotos={before:[],after:[]};currentServiceId=null;beforeStrip.innerHTML="";afterStrip.innerHTML="";renderServiceTemplate()}
+function clearService(ask=true){if(ask&&!confirm("Clear this service record and unsaved photos?"))return;document.querySelectorAll("#serviceView input").forEach(e=>{if(e.type==="checkbox")e.checked=false;else if(e.type!=="file")e.value=""});document.querySelectorAll("#serviceView textarea").forEach(e=>e.value="");sDate.value=today();sTech.value="Sterling";sType.value="Oil Change";sStatus.value="Completed";servicePhotos={before:[],after:[]};currentServiceId=null;beforeStrip.innerHTML="";afterStrip.innerHTML="";renderServiceTemplate();renderServiceInventoryUsage()}
 
 function renderServiceTemplate(){const fields=templates[sType.value]||[];serviceTemplate.innerHTML=`<h3 style="margin:0 0 10px">${sType.value} Details</h3><div class="grid" id="templateGrid"></div>`;const g=templateGrid;fields.forEach(([label,id,type="text",opts=[]])=>{const w=document.createElement("div");if(type==="check")w.innerHTML=`<label style="display:flex;gap:8px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:9px"><input data-field="${id}" type="checkbox" style="width:auto"> ${label}</label>`;else if(type==="select")w.innerHTML=`<label>${label}</label><select data-field="${id}">${opts.map(x=>`<option>${x}</option>`).join("")}</select>`;else if(type==="textarea")w.innerHTML=`<label>${label}</label><textarea data-field="${id}"></textarea>`;else w.innerHTML=`<label>${label}</label><input data-field="${id}">`;g.appendChild(w)})}
 function collectTemplate(){const d={};document.querySelectorAll("[data-field]").forEach(e=>d[e.dataset.field]=e.type==="checkbox"?e.checked:e.value);return d}
@@ -391,8 +458,9 @@ async function saveInspection(){
  await put("records",rec);if(bike&&iMileage.value){bike.mileage=iMileage.value;await put("bikes",bike)}currentInspectionId=rec.id;alert("Inspection saved.");openProfile(rec.bikeId)
 }
 async function saveService(){
- const bike=await one("bikes",sBikeId.value);const rec={id:currentServiceId||Date.now(),bikeId:sBikeId.value,kind:"service",version:APP_VERSION,date:sDate.value,technician:sTech.value,owner:sOwner.value,mileage:sMileage.value,serviceType:sType.value,template:collectTemplate(),concern:sConcern.value,work:sWork.value,parts:sParts.value,measurements:sMeasurements.value,result:sResult.value,lesson:sLesson.value,status:sStatus.value,nextService:sNext.value,beforePhotos:servicePhotos.before,afterPhotos:servicePhotos.after,updatedAt:new Date().toISOString()};
- await put("services",rec);if(bike&&sMileage.value){bike.mileage=sMileage.value;await put("bikes",bike)}currentServiceId=rec.id;alert("Service record saved.");openProfile(rec.bikeId)
+ const bike=await one("bikes",sBikeId.value),old=currentServiceId?await one("services",currentServiceId):null,usage=collectInventoryUsage();
+ const rec={id:currentServiceId||Date.now(),bikeId:sBikeId.value,kind:"service",version:APP_VERSION,date:sDate.value,technician:sTech.value,owner:sOwner.value,mileage:sMileage.value,serviceType:sType.value,template:collectTemplate(),concern:sConcern.value,work:sWork.value,parts:sParts.value,measurements:sMeasurements.value,result:sResult.value,lesson:sLesson.value,status:sStatus.value,nextService:sNext.value,beforePhotos:servicePhotos.before,afterPhotos:servicePhotos.after,inventoryUsage:usage,updatedAt:new Date().toISOString()};
+ await applyInventoryUsage(usage,old?.inventoryUsage||{});await put("services",rec);if(bike&&sMileage.value){bike.mileage=sMileage.value;await put("bikes",bike)}currentServiceId=rec.id;alert("Service record saved and inventory updated.");openProfile(rec.bikeId)
 }
 
 function setHistoryFilter(f){historyFilter=f;["All","Inspection","Service"].forEach(x=>document.getElementById("filter"+x).classList.toggle("active",x.toLowerCase()===f));renderHistory()}
@@ -404,14 +472,33 @@ async function renderHistory(){
  historyList.innerHTML=rows.length?rows.map(x=>{const b=map[x.bikeId],bikeName=b?`${b.year} ${b.make} ${b.model}`:"Unlinked motorcycle";return x.kind==="service"?`<div class="record"><b>${x.serviceType}</b><span class="badge">${x.status||"Saved"}</span><div class="small">${bikeName} • ${x.date||""} • ${x.mileage||"No mileage"} miles</div><div class="actions"><button class="success" onclick="openService(${x.id})">Open</button><button class="danger" onclick="deleteRecord('services',${x.id})">Delete</button></div></div>`:`<div class="record"><b>${x.purpose||"Inspection"}</b><span class="badge">${x.overall||"Saved"}</span><div class="small">${bikeName} • ${x.date||""} • ${x.mileage||"No mileage"} miles</div><div class="actions"><button onclick="openInspection(${x.id})">Open</button><button class="danger" onclick="deleteRecord('records',${x.id})">Delete</button></div></div>`}).join(""):"<div class='small'>No matching records.</div>"
 }
 async function openInspection(id){const r=await one("records",id);if(!r)return;clearInspection(false);currentInspectionId=r.id;await bikeOptions();iBikeId.value=r.bikeId||"";iDate.value=r.date||"";iTech.value=r.technician||"";iOwner.value=r.owner||"";iMileage.value=r.mileage||"";iPurpose.value=r.purpose||"";iOverall.value=r.overall||"Ride Ready";iScore.value=r.score||"";iRecommendations.value=r.recommendations||"";iNext.value=r.nextService||"";Object.entries(r.checks||{}).forEach(([id,c])=>{document.querySelectorAll(`input[name="${id}"]`).forEach(e=>e.checked=e.value===c.status);const n=document.getElementById(id+"_note");if(n)n.value=c.note||"";inspectionPhotos[id]=c.photos||[];renderInspectionPhotos(id)});showView("inspection")}
-async function openService(id){const r=await one("services",id);if(!r)return;clearService(false);currentServiceId=r.id;await bikeOptions();sBikeId.value=r.bikeId||"";sDate.value=r.date||"";sTech.value=r.technician||"";sOwner.value=r.owner||"";sMileage.value=r.mileage||"";sType.value=r.serviceType||"Custom Service";renderServiceTemplate();fillTemplate(r.template||{});sConcern.value=r.concern||"";sWork.value=r.work||"";sParts.value=r.parts||"";sMeasurements.value=r.measurements||"";sResult.value=r.result||"";sLesson.value=r.lesson||"";sStatus.value=r.status||"Completed";sNext.value=r.nextService||"";servicePhotos={before:r.beforePhotos||[],after:r.afterPhotos||[]};renderServicePhotos("before");renderServicePhotos("after");showView("service")}
+async function openService(id){const r=await one("services",id);if(!r)return;clearService(false);currentServiceId=r.id;await bikeOptions();sBikeId.value=r.bikeId||"";sDate.value=r.date||"";sTech.value=r.technician||"";sOwner.value=r.owner||"";sMileage.value=r.mileage||"";sType.value=r.serviceType||"Custom Service";renderServiceTemplate();fillTemplate(r.template||{});sConcern.value=r.concern||"";sWork.value=r.work||"";sParts.value=r.parts||"";sMeasurements.value=r.measurements||"";sResult.value=r.result||"";sLesson.value=r.lesson||"";sStatus.value=r.status||"Completed";sNext.value=r.nextService||"";servicePhotos={before:r.beforePhotos||[],after:r.afterPhotos||[]};renderServicePhotos("before");renderServicePhotos("after");await renderServiceInventoryUsage(r.inventoryUsage||{});showView("service")}
 async function deleteRecord(name,id){if(confirm("Delete this record and its attached photos?")){await del(name,id);renderHistory()}}
 
 async function saveGalleryPhoto(e){const f=e.target.files[0];if(!f)return;if(!gTitle.value.trim()){alert("Enter a title first.");return}const p=(await toPhotos([f]))[0];await put("refs",{id:Date.now(),category:gCategory.value,title:gTitle.value.trim(),notes:gNotes.value.trim(),photo:p.data,createdAt:new Date().toISOString()});gTitle.value="";gNotes.value="";e.target.value="";renderGallery()}
 async function renderGallery(){const refs=(await all("refs")).sort((a,b)=>b.id-a.id);galleryList.innerHTML=refs.length?refs.map(r=>`<div class="record"><img class="ref-photo" src="${r.photo}" onclick='openDataPhoto(${JSON.stringify(r.photo)},${JSON.stringify(r.category+" — "+r.title)})'><div style="margin-top:8px"><b>${r.title}</b><span class="badge">${r.category}</span></div><div class="small">${r.notes||""}</div><div class="actions"><button class="danger" onclick="if(confirm('Delete this reference photo?'))del('refs',${r.id}).then(renderGallery)">Delete</button></div></div>`).join(""):"<div class='small' style='margin-top:12px'>No reference photos saved.</div>"}
 
-async function exportBackup(){const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[];if(!confirm(`Import ${b.length} motorcycles, ${i.length} inspections, ${s.length} services, and ${r.length} reference photos?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid NightRivet backup.")}e.target.value=""}
+
+function stockState(item){const q=Number(item.qty||0),low=Number(item.lowAt||0);if(q<=0)return{label:"OUT",cls:"out"};if(q<=low)return{label:"LOW",cls:"low"};return{label:"IN STOCK",cls:"ok"}}
+function setInventoryFilter(f){inventoryFilter=f;["All","Low","Shopping"].forEach(x=>document.getElementById("inv"+x).classList.toggle("active",x.toLowerCase()===f));renderInventory()}
+async function renderInventory(){
+ const q=(inventorySearch.value||"").toLowerCase();let items=(await all("inventory")).filter(x=>JSON.stringify(x).toLowerCase().includes(q));
+ if(inventoryFilter==="low")items=items.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0));
+ if(inventoryFilter==="shopping"){items=items.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0));inventoryList.innerHTML=items.length?items.sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const need=Math.max(1,Number(x.lowAt||0)+1-Number(x.qty||0));return `<div class="shopping-item"><div><b>${x.name}</b><div class="small">${x.qty||0} ${x.unit||""} on hand • Suggested buy: ${need} ${x.unit||""}</div></div><button class="success" onclick="adjustInventory('${x.id}',${need})">Bought</button></div>`}).join(""):"<div class='small' style='margin-top:12px'>Nothing is currently low.</div>";return}
+ const groups={};items.forEach(x=>(groups[x.category||"Other"]=groups[x.category||"Other"]||[]).push(x));
+ const cats=Object.keys(groups).sort();inventoryList.innerHTML=cats.length?cats.map(cat=>`<h3 class="inventory-category">${cat}</h3>`+groups[cat].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const s=stockState(x);return `<div class="inventory-row"><div class="inventory-top"><div><div class="inventory-name">${x.name}</div><div class="small">${x.brand||""}${x.notes?` • ${x.notes}`:""}</div></div><div class="${s.cls}"><b>${s.label}</b></div></div><div class="stock-controls"><button onclick="adjustInventory('${x.id}',-1)">−</button><div class="stock-number">${Number(x.qty||0).toFixed(Number(x.qty||0)%1?1:0)} ${x.unit||""}</div><button onclick="adjustInventory('${x.id}',1)">+</button><button class="blue" onclick="openInventoryEditor('${x.id}')">Edit</button></div></div>`}).join("")).join(""):"<div class='small' style='margin-top:12px'>No inventory items found.</div>"
+}
+async function adjustInventory(id,amount){const x=await one("inventory",id);if(!x)return;x.qty=Math.max(0,Number(x.qty||0)+Number(amount||0));x.updatedAt=new Date().toISOString();await put("inventory",x);renderInventory();renderServiceInventoryUsage()}
+function openInventoryEditor(id=null){inventoryModal.classList.add("open");invId.value="";invCategory.value="Lubricants";invName.value="";invQty.value="0";invUnit.value="";invLowAt.value="1";invBrand.value="";invNotes.value="";deleteInventoryButton.style.display=id?"block":"none";inventoryEditorTitle.textContent=id?"Edit Inventory Item":"Add Inventory Item";if(id)one("inventory",id).then(x=>{invId.value=x.id;invCategory.value=x.category||"Other";invName.value=x.name||"";invQty.value=x.qty??0;invUnit.value=x.unit||"";invLowAt.value=x.lowAt??1;invBrand.value=x.brand||"";invNotes.value=x.notes||""})}
+function closeInventoryEditor(){inventoryModal.classList.remove("open")}
+async function saveInventoryItem(){if(!invName.value.trim()){alert("Enter an item name.");return}const id=invId.value||("inv_"+Date.now()),old=invId.value?await one("inventory",id):null;await put("inventory",{id,category:invCategory.value,name:invName.value.trim(),qty:Math.max(0,Number(invQty.value||0)),unit:invUnit.value.trim(),lowAt:Math.max(0,Number(invLowAt.value||0)),brand:invBrand.value.trim(),notes:invNotes.value.trim(),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()});closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}
+async function deleteInventoryItem(){const id=invId.value;if(id&&confirm("Delete this inventory item?")){await del("inventory",id);closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}}
+async function renderServiceInventoryUsage(savedUsage={}){const items=(await all("inventory")).sort((a,b)=>(a.category+a.name).localeCompare(b.category+b.name));serviceInventoryUsage.innerHTML=items.length?items.map(x=>`<div class="usage-row"><div><b>${x.name}</b><div class="small">${x.qty||0} ${x.unit||""} currently on hand</div></div><div><label>Used</label><input data-inventory-use="${x.id}" type="number" min="0" step="0.1" value="${Number(savedUsage[x.id]||0)||""}" placeholder="0"></div></div>`).join(""):"<div class='small' style='margin-top:10px'>No inventory items yet.</div>"}
+function collectInventoryUsage(){const d={};document.querySelectorAll("[data-inventory-use]").forEach(e=>{const n=Number(e.value||0);if(n>0)d[e.dataset.inventoryUse]=n});return d}
+async function applyInventoryUsage(newUsage,oldUsage={}){const ids=new Set([...Object.keys(newUsage||{}),...Object.keys(oldUsage||{})]);for(const id of ids){const item=await one("inventory",id);if(!item)continue;const delta=Number(newUsage?.[id]||0)-Number(oldUsage?.[id]||0);item.qty=Math.max(0,Number(item.qty||0)-delta);item.updatedAt=new Date().toISOString();await put("inventory",item)}}
+
+async function exportBackup(){const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs"),inventory:await all("inventory")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[],v=p.inventory||[];if(!confirm(`Import ${b.length} motorcycles, ${i.length} inspections, ${s.length} services, ${r.length} reference photos, and ${v.length} inventory items?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);for(const x of v)await put("inventory",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid NightRivet backup.")}e.target.value=""}
 
 async function migrateUnlinkedRecords(){
  const bikes=await all("bikes"),z=bikes.find(b=>b.id==="z500"),v=bikes.find(b=>b.id==="vulcan");
@@ -426,7 +513,7 @@ async function migrateUnlinkedRecords(){
  }
 }
 
-async function init(){await openDB();await seedBikes();await migrateUnlinkedRecords();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+async function init(){await openDB();await seedBikes();await seedInventory();await migrateUnlinkedRecords();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();await renderServiceInventoryUsage();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
 init();
 </script>
 </body>
