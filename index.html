@@ -12,19 +12,19 @@
 :root{
  --bg:#08080a;--panel:#151519;--panel2:#1d1d23;--line:#36363f;--text:#f3f3f5;
  --muted:#aaaab4;--red:#a81220;--green:#347a4d;--amber:#9b7116;--danger:#771018;
- --blue:#315c87;--shadow:0 12px 30px #0008;
+ --blue:#315c87;--shadow:0 12px 30px #0008;--soft-shadow:0 8px 20px #0006;--radius:17px;
 }
 *{box-sizing:border-box}
 html{background:var(--bg)}
-body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#050507,#111116);color:var(--text)}
+body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#17171d 0,#09090c 30%,#050507 72%);color:var(--text);letter-spacing:.01em}
 button,input,textarea,select{font:inherit}
 .app{max-width:1040px;margin:auto;padding:14px 14px 76px}
-.hero{display:flex;align-items:center;gap:14px;padding:15px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#19191e,#0b0b0e);box-shadow:var(--shadow)}
+.hero{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid #3c3c45;border-radius:22px;background:linear-gradient(145deg,#1d1d23,#0a0a0d);box-shadow:0 18px 38px #0009}
 .hero img{width:70px;height:70px;border-radius:17px}.hero h1{margin:0;font-size:27px}.tag{color:var(--muted);margin-top:5px}
 .nav{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:12px 0}
-button{border:0;border-radius:11px;padding:12px 10px;font-size:14px;font-weight:700;color:#fff;background:#292930;cursor:pointer}
+button{border:1px solid #3a3a43;border-radius:13px;padding:12px 10px;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(180deg,#303038,#25252c);cursor:pointer;box-shadow:0 5px 13px #0005;transition:transform .14s ease,filter .14s ease}button:active{transform:scale(.985);filter:brightness(.92)}
 button.active,.primary{background:var(--red)}button.success{background:var(--green)}button.warn{background:var(--amber)}button.danger{background:var(--danger)}button.blue{background:var(--blue)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;margin:12px 0}
+.card{background:linear-gradient(155deg,#18181e,#121217);border:1px solid #393942;border-radius:var(--radius);padding:15px;margin:14px 0;box-shadow:var(--soft-shadow)}
 .title{font-size:18px;margin:0 0 11px;border-left:4px solid var(--red);padding-left:9px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .small{font-size:12px;color:var(--muted)}
@@ -49,7 +49,7 @@ textarea{min-height:82px;resize:vertical}
 #galleryList .record{
  overflow:hidden;
 }
-.bike-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+.bike-card{background:linear-gradient(150deg,#212128,#16161b);border:1px solid #3d3d46;border-radius:18px;padding:13px;margin:12px 0;box-shadow:0 9px 22px #0006;overflow:hidden}
 .bike-head{display:flex;gap:12px;align-items:center}
 .bike-cover{width:88px;height:88px;border-radius:12px;object-fit:cover;border:1px solid #4b4b55;background:#0f0f13}
 .bike-main{flex:1}.bike-name{font-weight:800;font-size:17px;margin-bottom:5px}
@@ -96,6 +96,23 @@ textarea{min-height:82px;resize:vertical}
 .spec-value{text-align:right;font-weight:700;font-size:13px}
 @media(max-width:760px){.spec-grid{grid-template-columns:1fr}}
 
+
+.section-kicker{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#b6b6c1;margin-bottom:4px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.dashboard-tile{background:#101015;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.dashboard-tile b{display:block;font-size:21px}.dashboard-tile span{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.garage-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:11px}
+.summary-box{background:#101015;border:1px solid var(--line);border-radius:12px;padding:10px}.summary-box b{display:block;font-size:15px}.summary-box span{font-size:11px;color:var(--muted)}
+.condition-banner{border:1px solid #41414a;border-radius:15px;padding:14px;background:linear-gradient(145deg,#15151a,#0d0d11);margin-top:12px}
+.condition-title{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.condition-value{font-size:22px;font-weight:900;margin-top:5px}
+.condition-detail{font-size:12px;color:var(--muted);margin-top:5px}
+.status-good{color:#76d090}.status-warn{color:#efc35c}.status-bad{color:#ff6f78}.status-neutral{color:#c0c0c9}
+.timeline-thumb{width:68px;height:68px;border-radius:10px;object-fit:cover;border:1px solid #474750;flex:0 0 auto}
+.timeline-body{display:flex;gap:11px;align-items:center}.timeline-copy{min-width:0;flex:1}.timeline-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.card-enter{animation:cardIn .25s ease both}@keyframes cardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(max-width:760px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}.garage-summary{grid-template-columns:1fr}}
+
 .modal{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.open{display:flex}
 .modal-box{max-width:900px;width:100%;max-height:94vh;overflow:auto;background:#111116;border:1px solid var(--line);border-radius:14px;padding:12px}.modal img{width:100%;height:auto;border-radius:10px}.modal-close{position:sticky;top:0;float:right;background:var(--danger);z-index:2}
 @media(max-width:760px){
@@ -117,17 +134,28 @@ textarea{min-height:82px;resize:vertical}
 </header>
 
 <nav class="nav">
- <button id="navGarage" class="active" onclick="showView('garage')">Garage</button>
- <button id="navInspection" onclick="startInspectionFromSelected()">Inspection</button>
- <button id="navService" onclick="startServiceFromSelected()">Service</button>
- <button id="navHistory" onclick="showView('history')">History</button>
- <button id="navGallery" onclick="showView('gallery')">Gallery</button>
- <button id="navInventory" onclick="showView('inventory')">Inventory</button>
- <button id="navMaintenance" onclick="showView('maintenance')">Reminders</button>
+ <button id="navGarage" class="active" onclick="showView('garage')">🏍 Garage</button>
+ <button id="navInspection" onclick="startInspectionFromSelected()">🔍 Inspection</button>
+ <button id="navService" onclick="startServiceFromSelected()">🔧 Service</button>
+ <button id="navHistory" onclick="showView('history')">📜 History</button>
+ <button id="navGallery" onclick="showView('gallery')">📷 Gallery</button>
+ <button id="navInventory" onclick="showView('inventory')">📦 Inventory</button>
+ <button id="navMaintenance" onclick="showView('maintenance')">⏰ Reminders</button>
 </nav>
 
 <section id="garageView">
- <div class="card">
+ <div class="card card-enter">
+  <div class="section-kicker">Workshop Overview</div>
+  <h2 class="title">Garage Dashboard</h2>
+  <div class="dashboard-grid">
+   <div class="dashboard-tile"><b id="dashBikeCount">0</b><span>Motorcycles</span></div>
+   <div class="dashboard-tile"><b id="dashDueCount">0</b><span>Due / Overdue</span></div>
+   <div class="dashboard-tile"><b id="dashLowStock">0</b><span>Low Inventory</span></div>
+   <div class="dashboard-tile"><b id="dashRecordCount">0</b><span>Total Records</span></div>
+  </div>
+  <div id="dashRecent" class="small" style="margin-top:11px"></div>
+ </div>
+ <div class="card card-enter">
   <h2 class="title">Motorcycles</h2>
   <div class="grid">
    <input id="garageSearch" placeholder="Search year, make, model, owner, or status" oninput="renderGarage()">
@@ -156,6 +184,7 @@ textarea{min-height:82px;resize:vertical}
      <div class="stat"><b id="statServices">0</b><span class="small">Services</span></div>
     </div>
     <div style="margin-top:10px"><label>Current Goal / Next Task</label><textarea id="profileGoal" onchange="saveProfileGoal()"></textarea></div>
+    <div id="profileConditionBanner" class="condition-banner"></div>
     <div class="actions"><button onclick="startInspectionForCurrent()">New Inspection</button><button class="success" onclick="startServiceForCurrent()">New Service</button><button class="blue" onclick="openBikeEditor(currentBikeId)">Edit Profile</button></div>
    </div>
   </div>
@@ -414,7 +443,7 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="5.4.0",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
+const APP_VERSION="6.0.0",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
 let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
@@ -499,11 +528,52 @@ async function bikeOptions(){
  return bikes;
 }
 
+
+async function renderGarageDashboard(){
+ const bikes=await all("bikes"),ins=await all("records"),svc=await all("services"),inv=await all("inventory"),rem=await all("reminders");
+ let due=0;
+ for(const r of rem){const b=bikes.find(x=>x.id===r.bikeId),s=reminderState(r,b?.mileage||0);if(s.overdue||s.dueSoon)due++}
+ dashBikeCount.textContent=bikes.length;dashDueCount.textContent=due;
+ dashLowStock.textContent=inv.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0)).length;
+ dashRecordCount.textContent=ins.length+svc.length;
+ const activity=[...ins.map(x=>({...x,kind:"inspection"})),...svc.map(x=>({...x,kind:"service"}))].sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+ if(!activity.length){dashRecent.textContent="No workshop activity recorded yet.";return}
+ const latest=activity[0],bike=bikes.find(x=>x.id===latest.bikeId);
+ dashRecent.innerHTML=`<b>Recent activity:</b> ${latest.kind==="service"?(latest.serviceType||"Service"):(latest.purpose||"Inspection")} • ${bike?`${bike.year} ${bike.make} ${bike.model}`:"Unlinked motorcycle"} • ${latest.date||""}`;
+}
+function recordPhotoCount(r){
+ if(r.kind==="service")return (r.beforePhotos?.length||0)+(r.afterPhotos?.length||0);
+ return Object.values(r.checks||{}).reduce((n,c)=>n+(c.photos?.length||0),0);
+}
+function recordThumb(r){
+ if(r.kind==="service")return r.afterPhotos?.[0]?.data||r.beforePhotos?.[0]?.data||"";
+ for(const c of Object.values(r.checks||{})){if(c.photos?.[0]?.data)return c.photos[0].data}
+ return "";
+}
+async function renderProfileCondition(bikeId){
+ const ins=(await all("records")).filter(x=>x.bikeId===bikeId).sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||"")),latest=ins[0];
+ let title="NO CURRENT INSPECTION",cls="status-neutral",detail="Complete a Ride Ready inspection to establish current condition.";
+ if(latest){
+  if(latest.overall==="Ride Ready"){title="READY TO RIDE";cls="status-good"}
+  else if(latest.overall==="Repair Before Riding"){title="ATTENTION REQUIRED";cls="status-bad"}
+  else{title="SERVICE RECOMMENDED";cls="status-warn"}
+  detail=`Last inspection: ${latest.date||"Unknown date"}${latest.recommendations?` • ${latest.recommendations}`:""}`;
+ }
+ profileConditionBanner.innerHTML=`<div class="condition-title">Current Condition</div><div class="condition-value ${cls}">${title}</div><div class="condition-detail">${detail}</div>`;
+}
+
 async function renderGarage(){
+ await renderGarageDashboard();
  const list=garageList,q=(garageSearch.value||"").toLowerCase();let bikes=await all("bikes");
  bikes=bikes.filter(b=>JSON.stringify(b).toLowerCase().includes(q)).sort((a,b)=>(a.ownership+b.year).localeCompare(b.ownership+a.year));
  if(!bikes.length){list.innerHTML="<div class='small' style='margin-top:12px'>No matching motorcycles.</div>";return}
- list.innerHTML=bikes.map(b=>`<div class="bike-card"><div class="bike-head"><img class="bike-cover" src="${b.photo||"icon-512.png"}"><div class="bike-main"><div class="bike-name">${b.year} ${b.make} ${b.model}</div><div class="small">${b.ownership} • ${b.owner||"No owner"} • ${b.status}</div>${b.goal?`<div class="small" style="margin-top:5px">Next: ${b.goal}</div>`:""}</div></div><div class="actions"><button onclick="openProfile('${b.id}')">Open Profile</button><button class="success" onclick="newService('${b.id}')">Service</button><button onclick="newInspection('${b.id}')">Inspect</button></div></div>`).join("");
+ const inspections=await all("records"),services=await all("services"),reminders=await all("reminders");
+ list.innerHTML=bikes.map(b=>{
+  const bs=services.filter(x=>x.bikeId===b.id).sort((a,c)=>(c.updatedAt||"").localeCompare(a.updatedAt||""));
+  const br=reminders.filter(x=>x.bikeId===b.id).map(r=>({r,s:reminderState(r,b.mileage||0)})).sort((a,c)=>(c.s.overdue-a.s.overdue)||(c.s.dueSoon-a.s.dueSoon));
+  const next=br.find(x=>x.s.overdue||x.s.dueSoon)||br[0],last=bs[0];
+  return `<div class="bike-card card-enter"><div class="bike-head"><img class="bike-cover" src="${b.photo||"icon-512.png"}"><div class="bike-main"><div class="bike-name">${b.year} ${b.make} ${b.model}</div><div class="small">${b.ownership} • ${b.owner||"No owner"}</div><div style="margin-top:7px"><span class="badge">${b.status}</span></div></div></div><div class="garage-summary"><div class="summary-box"><span>Mileage</span><b>${b.mileage||"—"}</b></div><div class="summary-box"><span>Last Service</span><b>${last?.serviceType||"None"}</b></div><div class="summary-box"><span>Next Due</span><b>${next?.r?.name||"None"}</b></div></div>${b.goal?`<div class="small" style="margin-top:9px"><b>Current goal:</b> ${b.goal}</div>`:""}<div class="actions"><button onclick="openProfile('${b.id}')">Open Garage File</button><button class="success" onclick="newService('${b.id}')">New Service</button><button onclick="newInspection('${b.id}')">Inspect</button></div></div>`;
+ }).join("");
 }
 
 async function openProfile(id){
@@ -511,9 +581,12 @@ async function openProfile(id){
  profilePhoto.src=b.photo||"icon-512.png";profileName.textContent=`${b.year} ${b.make} ${b.model}`;profileOwner.textContent=`${b.ownership} • ${b.owner||"No owner listed"}`;
  profileStatus.innerHTML=`<span class="badge">${b.status}</span>`;statMileage.textContent=b.mileage||"—";profileGoal.value=b.goal||"";
  const inspections=(await all("records")).filter(x=>x.bikeId===id),services=(await all("services")).filter(x=>x.bikeId===id);
- statInspections.textContent=inspections.length;statServices.textContent=services.length;await renderProfileSpecs(id);await renderProfileMaintenance(id);
+ statInspections.textContent=inspections.length;statServices.textContent=services.length;await renderProfileCondition(id);await renderProfileSpecs(id);await renderProfileMaintenance(id);
  const rows=[...inspections.map(x=>({...x,kind:"inspection"})),...services.map(x=>({...x,kind:"service"}))].sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
- profileTimeline.innerHTML=rows.length?rows.map(x=>x.kind==="service"?`<div class="timeline-entry"><div class="timeline-head"><div><span class="timeline-dot"></span><b>${x.serviceType}</b><span class="badge">${x.status||"Saved"}</span></div><div class="small">${x.date||""}</div></div><div class="small">${x.mileage||"No mileage"} miles${x.lesson?" • Lesson recorded":""}</div><div class="actions"><button class="success" onclick="openService(${x.id})">Open</button></div></div>`:`<div class="timeline-entry"><div class="timeline-head"><div><span class="timeline-dot"></span><b>${x.purpose||"Inspection"}</b><span class="badge">${x.overall||"Saved"}</span></div><div class="small">${x.date||""}</div></div><div class="small">${x.mileage||"No mileage"} miles</div><div class="actions"><button onclick="openInspection(${x.id})">Open</button></div></div>`).join(""):"<div class='small'>No history for this motorcycle yet.</div>";
+ profileTimeline.innerHTML=rows.length?rows.map(x=>{
+  const thumb=recordThumb(x),photos=recordPhotoCount(x);
+  return `<div class="timeline-entry card-enter"><div class="timeline-body">${thumb?`<img class="timeline-thumb" src="${thumb}">`:""}<div class="timeline-copy"><div class="timeline-head"><div><span class="timeline-dot"></span><b>${x.kind==="service"?(x.serviceType||"Service"):(x.purpose||"Inspection")}</b><span class="badge">${x.kind==="service"?(x.status||"Saved"):(x.overall||"Saved")}</span></div><div class="small">${x.date||""}</div></div><div class="timeline-meta">${x.mileage||"No mileage"} miles • ${photos} photo${photos===1?"":"s"}${x.lesson?" • Lesson recorded":""}</div></div></div><div class="actions"><button class="${x.kind==="service"?"success":""}" onclick="${x.kind==="service"?`openService(${x.id})`:`openInspection(${x.id})`}">Open Record</button></div></div>`;
+ }).join(""):"<div class='small'>No history for this motorcycle yet.</div>";
  showView("profile");
 }
 async function saveProfileGoal(){if(!currentBikeId)return;const b=await one("bikes",currentBikeId);b.goal=profileGoal.value;b.updatedAt=new Date().toISOString();await put("bikes",b)}

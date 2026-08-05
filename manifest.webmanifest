@@ -1,7 +1,7 @@
 {
   "name": "NightRivet Moto",
   "short_name": "NightRivet",
-  "description": "Motorcycle profiles with editable stock specifications, service records, reminders, inventory, photos, and history.",
+  "description": "Professional motorcycle workshop companion with profiles, inspections, service records, reminders, inventory, specifications, photos, and history.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
