@@ -443,7 +443,7 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="6.0.0",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
+const APP_VERSION="6.0.1",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
 let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
@@ -562,6 +562,42 @@ async function renderProfileCondition(bikeId){
  profileConditionBanner.innerHTML=`<div class="condition-title">Current Condition</div><div class="condition-value ${cls}">${title}</div><div class="condition-detail">${detail}</div>`;
 }
 
+
+function validMileage(value){
+ const n=Number(String(value??"").replace(/,/g,"").trim());
+ return Number.isFinite(n)&&n>=0?n:null;
+}
+async function syncBikeMileage(bikeId,newMileage){
+ if(!bikeId)return false;
+ const incoming=validMileage(newMileage);if(incoming===null)return false;
+ const bike=await one("bikes",bikeId);if(!bike)return false;
+ const current=validMileage(bike.mileage);
+ if(current===null||incoming>current){
+  bike.mileage=String(Math.round(incoming));
+  bike.updatedAt=new Date().toISOString();
+  await put("bikes",bike);
+  return true;
+ }
+ return false;
+}
+async function repairBikeMileageFromHistory(){
+ const bikes=await all("bikes"),ins=await all("records"),svc=await all("services");
+ for(const bike of bikes){
+  const values=[
+   validMileage(bike.mileage),
+   ...ins.filter(x=>x.bikeId===bike.id).map(x=>validMileage(x.mileage)),
+   ...svc.filter(x=>x.bikeId===bike.id).map(x=>validMileage(x.mileage))
+  ].filter(x=>x!==null);
+  if(!values.length)continue;
+  const highest=Math.max(...values),current=validMileage(bike.mileage);
+  if(current===null||highest>current){
+   bike.mileage=String(Math.round(highest));
+   bike.updatedAt=new Date().toISOString();
+   await put("bikes",bike);
+  }
+ }
+}
+
 async function renderGarage(){
  await renderGarageDashboard();
  const list=garageList,q=(garageSearch.value||"").toLowerCase();let bikes=await all("bikes");
@@ -647,7 +683,7 @@ function closePhotoModal(e){if(e.target===photoModal)forceClosePhotoModal()}func
 async function saveInspection(){
  const bike=await one("bikes",iBikeId.value);const rec={id:currentInspectionId||Date.now(),bikeId:iBikeId.value,kind:"inspection",version:APP_VERSION,date:iDate.value,technician:iTech.value,owner:iOwner.value,mileage:iMileage.value,purpose:iPurpose.value,overall:iOverall.value,score:iScore.value,recommendations:iRecommendations.value,nextService:iNext.value,checks:{},updatedAt:new Date().toISOString()};
  Object.entries(inspectionGroups).forEach(([g,items])=>items.forEach(item=>{const id=itemId(g,item),sel=document.querySelector(`input[name="${id}"]:checked`);rec.checks[id]={group:g,label:item,status:sel?sel.value:"",note:document.getElementById(id+"_note").value,photos:inspectionPhotos[id]||[]}}));
- await put("records",rec);if(bike&&iMileage.value){bike.mileage=iMileage.value;await put("bikes",bike)}currentInspectionId=rec.id;alert("Inspection saved.");openProfile(rec.bikeId)
+ await put("records",rec);await syncBikeMileage(rec.bikeId,iMileage.value);currentInspectionId=rec.id;alert("Inspection saved. Motorcycle mileage synchronized.");openProfile(rec.bikeId)
 }
 async function saveService(){
  const bike=await one("bikes",sBikeId.value),old=currentServiceId?await one("services",currentServiceId):null,usage=collectInventoryUsage();
@@ -658,7 +694,7 @@ async function saveService(){
   alert(err.message||"Inventory could not be updated.");
   return;
  }
- await put("services",rec);if(bike&&sMileage.value){bike.mileage=sMileage.value;await put("bikes",bike)}currentServiceId=rec.id;const activeReminderId=sessionStorage.getItem("activeReminderId");if(activeReminderId){await completeReminder(activeReminderId,sMileage.value||bike?.mileage||"",sDate.value||today());sessionStorage.removeItem("activeReminderId")}alert("Service record saved and inventory updated.");openProfile(rec.bikeId)
+ await put("services",rec);await syncBikeMileage(rec.bikeId,sMileage.value);currentServiceId=rec.id;const activeReminderId=sessionStorage.getItem("activeReminderId");if(activeReminderId){await completeReminder(activeReminderId,sMileage.value||bike?.mileage||"",sDate.value||today());sessionStorage.removeItem("activeReminderId")}alert("Service record saved and inventory updated.");openProfile(rec.bikeId)
 }
 
 function setHistoryFilter(f){historyFilter=f;["All","Inspection","Service"].forEach(x=>document.getElementById("filter"+x).classList.toggle("active",x.toLowerCase()===f));renderHistory()}
@@ -865,7 +901,7 @@ async function migrateUnlinkedRecords(){
  }
 }
 
-async function init(){await openDB();await seedBikes();await seedInventory();await migrateInventory20();await seedReminders();await migrateUnlinkedRecords();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();await renderServiceInventoryUsage();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+async function init(){await openDB();await seedBikes();await seedInventory();await migrateInventory20();await seedReminders();await migrateUnlinkedRecords();await repairBikeMileageFromHistory();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();await renderServiceInventoryUsage();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
 init();
 </script>
 </body>
