@@ -1,7 +1,7 @@
 {
   "name": "NightRivet Moto",
   "short_name": "NightRivet",
-  "description": "Professional motorcycle workshop companion with profiles, inspections, service records, reminders, inventory, specifications, photos, and history.",
+  "description": "NightRivet Blacksmith Edition motorcycle workshop companion.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -21,6 +21,164 @@ button,input,textarea,select{font:inherit}
 .app{max-width:1040px;margin:auto;padding:14px 14px 76px}
 .hero{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid #3c3c45;border-radius:22px;background:linear-gradient(145deg,#1d1d23,#0a0a0d);box-shadow:0 18px 38px #0009}
 .hero img{width:70px;height:70px;border-radius:17px}.hero h1{margin:0;font-size:27px}.tag{color:var(--muted);margin-top:5px}
+.blacksmith-header{
+ min-height:176px;
+ display:grid;
+ grid-template-columns:92px minmax(0,1fr) auto;
+ align-items:center;
+ gap:18px;
+ padding:22px 22px 20px;
+ border:1px solid #4a4a55;
+ border-radius:24px;
+ background:
+   linear-gradient(118deg,#08080b 0%,#17171c 44%,#0c0c10 100%);
+ box-shadow:
+   inset 0 1px 0 #ffffff12,
+   inset 0 -18px 34px #0007,
+   0 18px 42px #000a;
+ overflow:hidden;
+ position:relative;
+}
+.blacksmith-header:before{
+ content:"";
+ position:absolute;inset:0;
+ background:
+  repeating-linear-gradient(105deg,#ffffff08 0 1px,transparent 1px 7px),
+  linear-gradient(90deg,transparent,#8b111c12 48%,transparent 72%);
+ opacity:.24;
+ pointer-events:none;
+}
+.blacksmith-header:after{
+ content:"";
+ position:absolute;
+ left:0;right:0;bottom:0;height:3px;
+ background:linear-gradient(90deg,transparent 0%,#71101a 14%,#c01928 48%,#71101a 82%,transparent 100%);
+ box-shadow:0 0 18px #a8122077;
+}
+.header-grid{
+ position:absolute;inset:0;
+ background-image:
+  linear-gradient(#ffffff08 1px,transparent 1px),
+  linear-gradient(90deg,#ffffff08 1px,transparent 1px);
+ background-size:22px 22px;
+ opacity:.13;
+ mask-image:linear-gradient(90deg,transparent,#000 20%,#000 78%,transparent);
+}
+.header-rotor{
+ position:absolute;
+ width:270px;height:270px;
+ right:-78px;top:-54px;
+ border:18px solid #ffffff0a;
+ border-radius:50%;
+ box-shadow:
+  0 0 0 12px #a8122010,
+  inset 0 0 0 2px #ffffff08;
+ opacity:.75;
+}
+.header-rotor:before,.header-rotor:after{
+ content:"";position:absolute;inset:28px;border-radius:50%;
+ border:2px dashed #b8b8c012;
+}
+.header-rotor:after{inset:72px;border-style:solid}
+.header-logo-wrap{position:relative;z-index:2}
+.header-logo-wrap img{
+ width:86px;height:86px;
+ border-radius:20px;
+ border:1px solid #51515b;
+ box-shadow:0 12px 28px #000b,inset 0 0 0 1px #ffffff0f;
+ position:relative;z-index:2;
+}
+.header-logo-glow{
+ position:absolute;inset:-12px;
+ border-radius:28px;
+ background:radial-gradient(circle,#b0152444 0%,#7c0d1830 35%,transparent 72%);
+ filter:blur(8px);
+}
+.header-copy{position:relative;z-index:2;min-width:0}
+.header-kicker{
+ font-size:31px;
+ line-height:.95;
+ font-weight:1000;
+ letter-spacing:.055em;
+ color:#f3f3f5;
+ text-shadow:0 2px 0 #000,0 0 18px #ffffff0b;
+}
+.header-subtitle{
+ margin-top:7px;
+ font-size:17px;
+ font-weight:800;
+ letter-spacing:.19em;
+ text-transform:uppercase;
+ color:#b61a29;
+}
+.header-tagline{
+ margin-top:13px;
+ color:#c0c0c9;
+ font-size:14px;
+ line-height:1.35;
+}
+.header-status{
+ display:inline-flex;
+ align-items:center;
+ margin-top:12px;
+ padding:7px 10px;
+ border:1px solid #3e3e47;
+ border-radius:999px;
+ background:#0c0c10cc;
+ color:#d6d6dd;
+ font-size:11px;
+ font-weight:800;
+ letter-spacing:.04em;
+ box-shadow:inset 0 1px 0 #ffffff09;
+}
+.version-badge{
+ align-self:start;
+ justify-self:end;
+ min-width:88px;
+ text-align:right;
+ position:relative;z-index:2;
+ padding:9px 10px;
+ border:1px solid #4c4c56;
+ border-radius:11px;
+ background:linear-gradient(180deg,#1b1b20cc,#0d0d11cc);
+ box-shadow:inset 0 1px 0 #ffffff0d,0 8px 18px #0008;
+}
+.version-badge span{
+ display:block;
+ font-size:9px;
+ font-weight:900;
+ letter-spacing:.13em;
+ color:#c21b2b;
+}
+.version-badge b{
+ display:block;
+ margin-top:3px;
+ font-size:13px;
+ color:#ededf0;
+}
+.header-bolt{
+ position:absolute;width:8px;height:8px;border-radius:50%;
+ background:radial-gradient(circle at 35% 35%,#73737d,#2c2c32 55%,#08080a 72%);
+ box-shadow:inset 0 0 0 1px #ffffff14,0 1px 3px #000;
+ z-index:3;
+}
+.bolt-a{left:10px;top:10px}.bolt-b{right:10px;bottom:10px}
+@media(max-width:760px){
+ .blacksmith-header{
+  grid-template-columns:78px minmax(0,1fr);
+  gap:14px;
+  padding:18px 16px 17px;
+  min-height:158px;
+ }
+ .header-logo-wrap img{width:74px;height:74px;border-radius:18px}
+ .header-kicker{font-size:25px}
+ .header-subtitle{font-size:13px;letter-spacing:.14em}
+ .header-tagline{font-size:12px;margin-top:9px}
+ .header-status{font-size:10px;padding:6px 8px;margin-top:9px}
+ .version-badge{position:absolute;right:14px;top:14px;min-width:74px;padding:7px 8px}
+ .version-badge span{font-size:8px}.version-badge b{font-size:11px}
+ .header-copy{padding-right:70px}
+}
 .nav{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:12px 0}
 button{border:1px solid #3a3a43;border-radius:13px;padding:12px 10px;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(180deg,#303038,#25252c);cursor:pointer;box-shadow:0 5px 13px #0005;transition:transform .14s ease,filter .14s ease}button:active{transform:scale(.985);filter:brightness(.92)}
 button.active,.primary{background:var(--red)}button.success{background:var(--green)}button.warn{background:var(--amber)}button.danger{background:var(--danger)}button.blue{background:var(--blue)}
@@ -128,9 +286,28 @@ textarea{min-height:82px;resize:vertical}
 </head>
 <body>
 <div class="app">
-<header class="hero">
- <img src="icon-192.png" alt="NightRivet Moto">
- <div><h1>NightRivet Moto</h1><div class="tag">Every motorcycle. Every job. One complete history.</div></div>
+<header class="hero blacksmith-header">
+ <div class="header-rotor" aria-hidden="true"></div>
+ <div class="header-grid" aria-hidden="true"></div>
+ <div class="header-bolt bolt-a" aria-hidden="true"></div>
+ <div class="header-bolt bolt-b" aria-hidden="true"></div>
+
+ <div class="header-logo-wrap">
+  <div class="header-logo-glow"></div>
+  <img src="icon-192.png" alt="NightRivet Moto">
+ </div>
+
+ <div class="header-copy">
+  <div class="header-kicker">NIGHTRIVET</div>
+  <div class="header-subtitle">Moto Workshop</div>
+  <div class="header-tagline">Every motorcycle. Every job.<br>One complete history.</div>
+  <div id="headerWorkshopStatus" class="header-status">Loading workshop status…</div>
+ </div>
+
+ <div class="version-badge">
+  <span>BLACKSMITH</span>
+  <b>v6.1</b>
+ </div>
 </header>
 
 <nav class="nav">
@@ -443,7 +620,7 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="6.0.1",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
+const APP_VERSION="6.1.0",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
 let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
@@ -529,7 +706,34 @@ async function bikeOptions(){
 }
 
 
+
+async function renderHeaderWorkshopStatus(){
+ const bikes=await all("bikes"),ins=await all("records"),inv=await all("inventory"),rem=await all("reminders");
+ let overdue=0,dueSoon=0;
+ for(const r of rem){
+  const b=bikes.find(x=>x.id===r.bikeId),s=reminderState(r,b?.mileage||0);
+  if(s.overdue)overdue++;else if(s.dueSoon)dueSoon++;
+ }
+ const low=inv.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0)).length;
+ const latestInspections={};
+ for(const r of ins.sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""))){
+  if(!latestInspections[r.bikeId])latestInspections[r.bikeId]=r;
+ }
+ const attention=Object.values(latestInspections).filter(r=>r.overall==="Repair Before Riding").length;
+ let text="● Workshop ready";
+ let cls="status-good";
+ if(attention>0){text=`● ${attention} motorcycle${attention===1?"":"s"} require attention`;cls="status-bad"}
+ else if(overdue>0){text=`● ${overdue} maintenance item${overdue===1?"":"s"} overdue`;cls="status-bad"}
+ else if(dueSoon>0){text=`● ${dueSoon} maintenance item${dueSoon===1?"":"s"} due soon`;cls="status-warn"}
+ else if(low>0){text=`● ${low} inventory item${low===1?"":"s"} low`;cls="status-warn"}
+ else if(bikes.length){text=`● ${bikes.length} motorcycle${bikes.length===1?"":"s"} in garage`;cls="status-good"}
+ headerWorkshopStatus.textContent=text;
+ headerWorkshopStatus.classList.remove("status-good","status-warn","status-bad","status-neutral");
+ headerWorkshopStatus.classList.add(cls);
+}
+
 async function renderGarageDashboard(){
+ await renderHeaderWorkshopStatus();
  const bikes=await all("bikes"),ins=await all("records"),svc=await all("services"),inv=await all("inventory"),rem=await all("reminders");
  let due=0;
  for(const r of rem){const b=bikes.find(x=>x.id===r.bikeId),s=reminderState(r,b?.mileage||0);if(s.overdue||s.dueSoon)due++}
@@ -901,7 +1105,7 @@ async function migrateUnlinkedRecords(){
  }
 }
 
-async function init(){await openDB();await seedBikes();await seedInventory();await migrateInventory20();await seedReminders();await migrateUnlinkedRecords();await repairBikeMileageFromHistory();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();await renderServiceInventoryUsage();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+async function init(){await openDB();await seedBikes();await seedInventory();await migrateInventory20();await seedReminders();await migrateUnlinkedRecords();await repairBikeMileageFromHistory();buildInspection();await bikeOptions();iDate.value=sDate.value=today();renderServiceTemplate();await renderServiceInventoryUsage();await renderHeaderWorkshopStatus();renderGarage();if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{})}
 init();
 </script>
 </body>
