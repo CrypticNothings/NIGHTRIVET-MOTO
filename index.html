@@ -87,6 +87,15 @@ textarea{min-height:82px;resize:vertical}
 .progress-fill{height:100%;background:var(--green)}.progress-fill.due{background:var(--amber)}.progress-fill.overdue{background:var(--danger)}
 .schedule-meta{font-size:12px;color:var(--muted);margin-top:4px}
 .dashboard-alert{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:#101015;margin:8px 0}
+.spec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.spec-group{background:#101015;border:1px solid var(--line);border-radius:11px;padding:11px}
+.spec-group h3{margin:0 0 8px;font-size:15px}
+.spec-line{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid #292930}
+.spec-line:last-child{border-bottom:0}
+.spec-label{color:var(--muted);font-size:12px}
+.spec-value{text-align:right;font-weight:700;font-size:13px}
+@media(max-width:760px){.spec-grid{grid-template-columns:1fr}}
+
 .modal{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.open{display:flex}
 .modal-box{max-width:900px;width:100%;max-height:94vh;overflow:auto;background:#111116;border:1px solid var(--line);border-radius:14px;padding:12px}.modal img{width:100%;height:auto;border-radius:10px}.modal-close{position:sticky;top:0;float:right;background:var(--danger);z-index:2}
 @media(max-width:760px){
@@ -150,6 +159,11 @@ textarea{min-height:82px;resize:vertical}
     <div class="actions"><button onclick="startInspectionForCurrent()">New Inspection</button><button class="success" onclick="startServiceForCurrent()">New Service</button><button class="blue" onclick="openBikeEditor(currentBikeId)">Edit Profile</button></div>
    </div>
   </div>
+ </div>
+ <div class="card">
+  <h2 class="title">Stock Specifications</h2>
+  <div id="profileSpecsSummary"></div>
+  <div class="actions"><button class="blue" onclick="openSpecsEditor()">Edit Stock Specifications</button></div>
  </div>
  <div class="card">
   <h2 class="title">Maintenance Status</h2>
@@ -320,6 +334,42 @@ textarea{min-height:82px;resize:vertical}
 
 
 
+
+<div id="specsModal" class="modal">
+ <div class="modal-box">
+  <button class="modal-close" onclick="closeSpecsEditor()">Close</button>
+  <h2>Stock Specifications</h2>
+  <div class="small" style="margin-bottom:12px">Enter the factory-reference information you want available without leaving NightRivet.</div>
+
+  <h3 class="inventory-category">Tires</h3>
+  <div class="grid">
+   <div><label>Front Tire Size</label><input id="specFrontTire" placeholder="110/70-17"></div>
+   <div><label>Rear Tire Size</label><input id="specRearTire" placeholder="150/60-17"></div>
+   <div><label>Front Tire Pressure</label><input id="specFrontPsi" placeholder="32 psi"></div>
+   <div><label>Rear Tire Pressure</label><input id="specRearPsi" placeholder="36 psi"></div>
+  </div>
+
+  <h3 class="inventory-category">Filters & Fluids</h3>
+  <div class="grid">
+   <div><label>Oil Filter</label><input id="specOilFilter" placeholder="OEM or aftermarket part number"></div>
+   <div><label>Air Filter</label><input id="specAirFilter" placeholder="OEM or aftermarket part number"></div>
+   <div><label>Recommended Oil Type</label><input id="specOilType" placeholder="10W-40 full synthetic"></div>
+   <div><label>Oil Quantity</label><input id="specOilQty" placeholder="2.1 qt with filter"></div>
+  </div>
+
+  <h3 class="inventory-category">Ignition, Battery & Brakes</h3>
+  <div class="grid">
+   <div><label>Spark Plug</label><input id="specSparkPlug" placeholder="Part number"></div>
+   <div><label>Battery</label><input id="specBattery" placeholder="Battery type or part number"></div>
+   <div><label>Front Brake Pads</label><input id="specFrontPads" placeholder="Part number"></div>
+   <div><label>Rear Brake Pads</label><input id="specRearPads" placeholder="Part number"></div>
+  </div>
+
+  <div style="margin-top:12px"><label>Specification Notes</label><textarea id="specNotes" placeholder="Reference source, load-specific pressure note, preferred equivalent part numbers, etc."></textarea></div>
+  <div class="actions"><button class="success" onclick="saveStockSpecs()">Save Specifications</button></div>
+ </div>
+</div>
+
 <div id="reminderModal" class="modal">
  <div class="modal-box">
   <button class="modal-close" onclick="closeReminderEditor()">Close</button>
@@ -364,7 +414,7 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="5.3.1",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
+const APP_VERSION="5.4.0",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
 let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
@@ -461,7 +511,7 @@ async function openProfile(id){
  profilePhoto.src=b.photo||"icon-512.png";profileName.textContent=`${b.year} ${b.make} ${b.model}`;profileOwner.textContent=`${b.ownership} • ${b.owner||"No owner listed"}`;
  profileStatus.innerHTML=`<span class="badge">${b.status}</span>`;statMileage.textContent=b.mileage||"—";profileGoal.value=b.goal||"";
  const inspections=(await all("records")).filter(x=>x.bikeId===id),services=(await all("services")).filter(x=>x.bikeId===id);
- statInspections.textContent=inspections.length;statServices.textContent=services.length;await renderProfileMaintenance(id);
+ statInspections.textContent=inspections.length;statServices.textContent=services.length;await renderProfileSpecs(id);await renderProfileMaintenance(id);
  const rows=[...inspections.map(x=>({...x,kind:"inspection"})),...services.map(x=>({...x,kind:"service"}))].sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
  profileTimeline.innerHTML=rows.length?rows.map(x=>x.kind==="service"?`<div class="timeline-entry"><div class="timeline-head"><div><span class="timeline-dot"></span><b>${x.serviceType}</b><span class="badge">${x.status||"Saved"}</span></div><div class="small">${x.date||""}</div></div><div class="small">${x.mileage||"No mileage"} miles${x.lesson?" • Lesson recorded":""}</div><div class="actions"><button class="success" onclick="openService(${x.id})">Open</button></div></div>`:`<div class="timeline-entry"><div class="timeline-head"><div><span class="timeline-dot"></span><b>${x.purpose||"Inspection"}</b><span class="badge">${x.overall||"Saved"}</span></div><div class="small">${x.date||""}</div></div><div class="small">${x.mileage||"No mileage"} miles</div><div class="actions"><button onclick="openInspection(${x.id})">Open</button></div></div>`).join(""):"<div class='small'>No history for this motorcycle yet.</div>";
  showView("profile");
@@ -554,6 +604,80 @@ async function saveGalleryPhoto(e){const f=e.target.files[0];if(!f)return;if(!gT
 async function renderGallery(){const refs=(await all("refs")).sort((a,b)=>b.id-a.id);galleryList.innerHTML=refs.length?refs.map(r=>`<div class="record"><img class="ref-photo" src="${r.photo}" onclick='openDataPhoto(${JSON.stringify(r.photo)},${JSON.stringify(r.category+" — "+r.title)})'><div style="margin-top:8px"><b>${r.title}</b><span class="badge">${r.category}</span></div><div class="small">${r.notes||""}</div><div class="actions"><button class="danger" onclick="if(confirm('Delete this reference photo?'))del('refs',${r.id}).then(renderGallery)">Delete</button></div></div>`).join(""):"<div class='small' style='margin-top:12px'>No reference photos saved.</div>"}
 
 
+
+
+function cleanSpec(v){return (v||"").trim()}
+function specLine(label,value){
+ if(!value)return "";
+ return `<div class="spec-line"><div class="spec-label">${label}</div><div class="spec-value">${value}</div></div>`;
+}
+async function renderProfileSpecs(bikeId){
+ const bike=await one("bikes",bikeId);const s=bike?.stockSpecs||{};
+ const tires=[
+  specLine("Front tire",s.frontTire),
+  specLine("Rear tire",s.rearTire),
+  specLine("Front pressure",s.frontPsi),
+  specLine("Rear pressure",s.rearPsi)
+ ].join("");
+ const fluids=[
+  specLine("Oil filter",s.oilFilter),
+  specLine("Air filter",s.airFilter),
+  specLine("Oil type",s.oilType),
+  specLine("Oil quantity",s.oilQty)
+ ].join("");
+ const parts=[
+  specLine("Spark plug",s.sparkPlug),
+  specLine("Battery",s.battery),
+  specLine("Front pads",s.frontPads),
+  specLine("Rear pads",s.rearPads)
+ ].join("");
+ if(!tires&&!fluids&&!parts&&!s.notes){
+  profileSpecsSummary.innerHTML="<div class='small'>No stock specifications saved yet.</div>";
+  return;
+ }
+ profileSpecsSummary.innerHTML=`<div class="spec-grid">
+  ${tires?`<div class="spec-group"><h3>Tires</h3>${tires}</div>`:""}
+  ${fluids?`<div class="spec-group"><h3>Filters & Fluids</h3>${fluids}</div>`:""}
+  ${parts?`<div class="spec-group"><h3>Ignition, Battery & Brakes</h3>${parts}</div>`:""}
+ </div>${s.notes?`<div class="small" style="margin-top:10px"><b>Notes:</b> ${s.notes}</div>`:""}`;
+}
+async function openSpecsEditor(){
+ if(!currentBikeId){alert("Open a motorcycle profile first.");return}
+ const bike=await one("bikes",currentBikeId),s=bike?.stockSpecs||{};
+ specFrontTire.value=s.frontTire||"";specRearTire.value=s.rearTire||"";
+ specFrontPsi.value=s.frontPsi||"";specRearPsi.value=s.rearPsi||"";
+ specOilFilter.value=s.oilFilter||"";specAirFilter.value=s.airFilter||"";
+ specOilType.value=s.oilType||"";specOilQty.value=s.oilQty||"";
+ specSparkPlug.value=s.sparkPlug||"";specBattery.value=s.battery||"";
+ specFrontPads.value=s.frontPads||"";specRearPads.value=s.rearPads||"";
+ specNotes.value=s.notes||"";
+ specsModal.classList.add("open");
+}
+function closeSpecsEditor(){specsModal.classList.remove("open")}
+async function saveStockSpecs(){
+ if(!currentBikeId)return;
+ const bike=await one("bikes",currentBikeId);if(!bike)return;
+ bike.stockSpecs={
+  frontTire:cleanSpec(specFrontTire.value),
+  rearTire:cleanSpec(specRearTire.value),
+  frontPsi:cleanSpec(specFrontPsi.value),
+  rearPsi:cleanSpec(specRearPsi.value),
+  oilFilter:cleanSpec(specOilFilter.value),
+  airFilter:cleanSpec(specAirFilter.value),
+  oilType:cleanSpec(specOilType.value),
+  oilQty:cleanSpec(specOilQty.value),
+  sparkPlug:cleanSpec(specSparkPlug.value),
+  battery:cleanSpec(specBattery.value),
+  frontPads:cleanSpec(specFrontPads.value),
+  rearPads:cleanSpec(specRearPads.value),
+  notes:cleanSpec(specNotes.value),
+  updatedAt:new Date().toISOString()
+ };
+ bike.updatedAt=new Date().toISOString();
+ await put("bikes",bike);
+ closeSpecsEditor();await renderProfileSpecs(currentBikeId);
+ alert("Stock specifications saved.");
+}
 
 function monthsAfter(dateStr,months){if(!dateStr||!months)return "";const d=new Date(dateStr+"T12:00:00");d.setMonth(d.getMonth()+Number(months));return d.toISOString().slice(0,10)}
 function daysBetween(a,b){return Math.floor((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/(24*60*60*1000))}

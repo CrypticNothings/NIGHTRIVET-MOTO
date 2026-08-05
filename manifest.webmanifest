@@ -1,7 +1,7 @@
 {
   "name": "NightRivet Moto",
   "short_name": "NightRivet",
-  "description": "Motorcycle profiles, service records, maintenance reminders, and flexible unit-based consumables inventory.",
+  "description": "Motorcycle profiles with editable stock specifications, service records, reminders, inventory, photos, and history.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
