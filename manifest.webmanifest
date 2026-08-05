@@ -1,7 +1,7 @@
 {
   "name": "NightRivet Moto",
   "short_name": "NightRivet",
-  "description": "NightRivet motorcycle workshop companion with profiles, service records, inventory, reminders, specifications, and a Parts Queue.",
+  "description": "NightRivet motorcycle workshop companion with inventory product-reference photos, profiles, service records, reminders, specifications, and Parts Queue.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -254,6 +254,7 @@ textarea{min-height:82px;resize:vertical}
 .queue-notes{margin-top:9px;padding-top:9px;border-top:1px solid #303038;font-size:13px;line-height:1.42;color:#d3d3da}
 .queue-cost{font-size:16px;font-weight:900;margin-top:6px}
 
+.inventory-photo-button{margin-top:9px;width:100%}
 .modal{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.open{display:flex}
 .modal-box{max-width:900px;width:100%;max-height:94vh;overflow:auto;background:#111116;border:1px solid var(--line);border-radius:14px;padding:12px}.modal img{width:100%;height:auto;border-radius:10px}.modal-close{position:sticky;top:0;float:right;background:var(--danger);z-index:2}
 @media(max-width:760px){
@@ -642,6 +643,13 @@ textarea{min-height:82px;resize:vertical}
    <div><label>Preferred Brand / Part</label><input id="invBrand"></div>
   </div>
   <div style="margin-top:10px"><label>Notes</label><textarea id="invNotes"></textarea></div>
+  <div class="photo-zone">
+   <h3>Product Reference Photo</h3>
+   <div class="small">Save the exact container, label, packaging, or preferred product for quick reference.</div>
+   <input id="invPhotoInput" class="file" type="file" accept="image/*" onchange="addInventoryProductPhoto(event)">
+   <div class="actions"><button onclick="invPhotoInput.click()">Choose / Replace Photo</button><button id="removeInventoryPhotoButton" class="danger" onclick="removeInventoryProductPhoto()">Remove Photo</button></div>
+   <div id="inventoryPhotoPreview" class="photo-strip"></div>
+  </div>
   <div class="actions"><button class="success" onclick="saveInventoryItem()">Save Item</button><button id="deleteInventoryButton" class="danger" onclick="deleteInventoryItem()">Delete Item</button></div>
  </div>
 </div>
@@ -651,8 +659,8 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="6.2.0",DB_NAME="NightRivetMotoDB",DB_VERSION=6;
-let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all",partsQueueFilter="active";
+const APP_VERSION="6.3.0",DB_NAME="NightRivetMotoDB",DB_VERSION=6;
+let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all",partsQueueFilter="active",inventoryEditorPhoto="";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
 const inspectionGroups={
@@ -1156,12 +1164,27 @@ async function renderInventory(){
  if(inventoryFilter==="low")items=items.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0));
  if(inventoryFilter==="shopping"){items=items.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0));inventoryList.innerHTML=items.length?items.sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const need=Math.max(1,Number(x.lowAt||0)+1-Number(x.qty||0));return `<div class="shopping-item"><div><b>${x.name}</b><div class="small">${x.qty||0} ${x.unit||""} on hand • Suggested buy: ${need} ${x.unit||""}</div></div><button class="success" onclick="adjustInventory('${x.id}',${need})">Bought</button></div>`}).join(""):"<div class='small' style='margin-top:12px'>Nothing is currently low.</div>";return}
  const groups={};items.forEach(x=>(groups[x.category||"Other"]=groups[x.category||"Other"]||[]).push(x));
- const cats=Object.keys(groups).sort();inventoryList.innerHTML=cats.length?cats.map(cat=>`<h3 class="inventory-category">${cat}</h3>`+groups[cat].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const s=stockState(x);return `<div class="inventory-row"><div class="inventory-top"><div><div class="inventory-name">${x.name}</div><div class="small">${x.brand||""}${x.notes?` • ${x.notes}`:""}</div></div><div class="${s.cls}"><b>${s.label}</b></div></div><div class="stock-controls"><button onclick="adjustInventory('${x.id}',-1)">−</button><div class="stock-number">${displayInventory(x)}</div><button onclick="adjustInventory('${x.id}',1)">+</button><button class="blue" onclick="openInventoryEditor('${x.id}')">Edit</button></div></div>`}).join("")).join(""):"<div class='small' style='margin-top:12px'>No inventory items found.</div>"
+ const cats=Object.keys(groups).sort();inventoryList.innerHTML=cats.length?cats.map(cat=>`<h3 class="inventory-category">${cat}</h3>`+groups[cat].sort((a,b)=>a.name.localeCompare(b.name)).map(x=>{const s=stockState(x);return `<div class="inventory-row"><div class="inventory-top"><div><div class="inventory-name">${x.name}</div><div class="small">${x.brand||""}${x.notes?` • ${x.notes}`:""}</div></div><div class="${s.cls}"><b>${s.label}</b></div></div><div class="stock-controls"><button onclick="adjustInventory('${x.id}',-1)">−</button><div class="stock-number">${displayInventory(x)}</div><button onclick="adjustInventory('${x.id}',1)">+</button><button class="blue" onclick="openInventoryEditor('${x.id}')">Edit</button></div>${x.productPhoto?`<button class="inventory-photo-button" onclick='openDataPhoto(${JSON.stringify(x.productPhoto)},${JSON.stringify(x.name+" product reference")})'>View Product Photo</button>`:""}</div>`}).join("")).join(""):"<div class='small' style='margin-top:12px'>No inventory items found.</div>"
 }
 async function adjustInventory(id,amount){const x=await one("inventory",id);if(!x)return;x.qty=Math.max(0,Number(x.qty||0)+Number(amount||0));x.updatedAt=new Date().toISOString();await put("inventory",x);renderInventory();renderServiceInventoryUsage()}
-function openInventoryEditor(id=null){inventoryModal.classList.add("open");invId.value="";invCategory.value="Lubricants";invName.value="";invQty.value="0";invUnit.value="";invUsageUnit.value="";invUsageMode.value="decimal";invConversion.value="1";invLowAt.value="1";invBrand.value="";invNotes.value="";deleteInventoryButton.style.display=id?"block":"none";inventoryEditorTitle.textContent=id?"Edit Inventory Item":"Add Inventory Item";if(id)one("inventory",id).then(x=>{invId.value=x.id;invCategory.value=x.category||"Other";invName.value=x.name||"";invQty.value=x.qty??0;invUnit.value=x.unit||"";invUsageUnit.value=x.usageUnit||x.unit||"";invUsageMode.value=x.usageMode||"decimal";invConversion.value=x.conversion||1;invLowAt.value=x.lowAt??1;invBrand.value=x.brand||"";invNotes.value=x.notes||""})}
+function openInventoryEditor(id=null){inventoryModal.classList.add("open");invId.value="";invCategory.value="Lubricants";invName.value="";invQty.value="0";invUnit.value="";invUsageUnit.value="";invUsageMode.value="decimal";invConversion.value="1";invLowAt.value="1";invBrand.value="";invNotes.value="";inventoryEditorPhoto="";renderInventoryEditorPhoto();deleteInventoryButton.style.display=id?"block":"none";inventoryEditorTitle.textContent=id?"Edit Inventory Item":"Add Inventory Item";if(id)one("inventory",id).then(x=>{invId.value=x.id;invCategory.value=x.category||"Other";invName.value=x.name||"";invQty.value=x.qty??0;invUnit.value=x.unit||"";invUsageUnit.value=x.usageUnit||x.unit||"";invUsageMode.value=x.usageMode||"decimal";invConversion.value=x.conversion||1;invLowAt.value=x.lowAt??1;invBrand.value=x.brand||"";invNotes.value=x.notes||"";inventoryEditorPhoto=x.productPhoto||"";renderInventoryEditorPhoto()})}
 function closeInventoryEditor(){inventoryModal.classList.remove("open")}
-async function saveInventoryItem(){if(!invName.value.trim()){alert("Enter an item name.");return}const id=invId.value||("inv_"+Date.now()),old=invId.value?await one("inventory",id):null;await put("inventory",{id,category:invCategory.value,name:invName.value.trim(),qty:Math.max(0,Number(invQty.value||0)),unit:invUnit.value.trim(),usageUnit:invUsageUnit.value.trim()||invUnit.value.trim()||"unit",usageMode:invUsageMode.value,conversion:Math.max(.01,Number(invConversion.value||1)),lowAt:Math.max(0,Number(invLowAt.value||0)),brand:invBrand.value.trim(),notes:invNotes.value.trim(),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()});closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}
+
+function renderInventoryEditorPhoto(){
+ inventoryPhotoPreview.innerHTML=inventoryEditorPhoto?`<div class="photo-wrap"><img class="thumb" src="${inventoryEditorPhoto}" onclick="openDataPhoto(inventoryEditorPhoto,'Inventory product reference')"></div>`:"<div class='small'>No product photo saved.</div>";
+ removeInventoryPhotoButton.style.display=inventoryEditorPhoto?"block":"none";
+}
+async function addInventoryProductPhoto(event){
+ const file=event.target.files[0];if(!file)return;
+ try{inventoryEditorPhoto=await resizeImage(file,1400,.84);renderInventoryEditorPhoto()}
+ catch(err){alert("That photo could not be added.")}
+ event.target.value="";
+}
+function removeInventoryProductPhoto(){
+ if(inventoryEditorPhoto&&confirm("Remove the product reference photo?")){inventoryEditorPhoto="";renderInventoryEditorPhoto()}
+}
+
+async function saveInventoryItem(){if(!invName.value.trim()){alert("Enter an item name.");return}const id=invId.value||("inv_"+Date.now()),old=invId.value?await one("inventory",id):null;await put("inventory",{id,category:invCategory.value,name:invName.value.trim(),qty:Math.max(0,Number(invQty.value||0)),unit:invUnit.value.trim(),usageUnit:invUsageUnit.value.trim()||invUnit.value.trim()||"unit",usageMode:invUsageMode.value,conversion:Math.max(.01,Number(invConversion.value||1)),lowAt:Math.max(0,Number(invLowAt.value||0)),brand:invBrand.value.trim(),notes:invNotes.value.trim(),productPhoto:inventoryEditorPhoto||"",createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()});closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}
 async function deleteInventoryItem(){const id=invId.value;if(id&&confirm("Delete this inventory item?")){await del("inventory",id);closeInventoryEditor();renderInventory();renderServiceInventoryUsage()}}
 async function renderServiceInventoryUsage(savedUsage={}){const items=(await all("inventory")).sort((a,b)=>(a.category+a.name).localeCompare(b.category+b.name));serviceInventoryUsage.innerHTML=items.length?items.map(x=>`<div class="usage-row"><div><b>${x.name}</b><div class="small">${displayInventory(x)} currently on hand</div></div><div><label>Used (${x.usageUnit||x.unit||"unit"})</label><input data-inventory-use="${x.id}" type="number" min="0" step="${usageStep(x)}" value="${Number(savedUsage[x.id]||0)||""}" placeholder="0"></div></div>`).join(""):"<div class='small' style='margin-top:10px'>No inventory items yet.</div>"}
 function collectInventoryUsage(){const d={};document.querySelectorAll("[data-inventory-use]").forEach(e=>{const n=Number(e.value||0);if(n>0)d[e.dataset.inventoryUse]=n});return d}
