@@ -244,6 +244,16 @@ textarea{min-height:82px;resize:vertical}
 .card-enter{animation:cardIn .25s ease both}@keyframes cardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(max-width:760px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}.garage-summary{grid-template-columns:1fr}}
 
+
+.queue-card{background:linear-gradient(150deg,#202027,#15151a);border:1px solid #3d3d46;border-radius:15px;padding:13px;margin:10px 0;box-shadow:0 8px 20px #0005}
+.queue-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.queue-name{font-size:17px;font-weight:900}
+.queue-meta{font-size:12px;color:var(--muted);margin-top:5px}
+.priority-high{color:#ff737c}.priority-medium{color:#edc15c}.priority-low{color:#82d59b}
+.queue-status{display:inline-block;padding:4px 8px;border:1px solid #44444e;border-radius:999px;background:#111116;font-size:11px;font-weight:800}
+.queue-notes{margin-top:9px;padding-top:9px;border-top:1px solid #303038;font-size:13px;line-height:1.42;color:#d3d3da}
+.queue-cost{font-size:16px;font-weight:900;margin-top:6px}
+
 .modal{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;padding:15px;z-index:50}.modal.open{display:flex}
 .modal-box{max-width:900px;width:100%;max-height:94vh;overflow:auto;background:#111116;border:1px solid var(--line);border-radius:14px;padding:12px}.modal img{width:100%;height:auto;border-radius:10px}.modal-close{position:sticky;top:0;float:right;background:var(--danger);z-index:2}
 @media(max-width:760px){
@@ -286,6 +296,7 @@ textarea{min-height:82px;resize:vertical}
  <button id="navGallery" onclick="showView('gallery')">📷 Gallery</button>
  <button id="navInventory" onclick="showView('inventory')">📦 Inventory</button>
  <button id="navMaintenance" onclick="showView('maintenance')">⏰ Reminders</button>
+ <button id="navPlanner" onclick="showView('planner')">🧾 Parts Queue</button>
 </nav>
 
 <section id="garageView">
@@ -454,6 +465,23 @@ textarea{min-height:82px;resize:vertical}
  </div>
 </section>
 
+<section id="plannerView" class="hidden">
+ <div class="card card-enter">
+  <div class="section-kicker">Future Purchases & Ideas</div>
+  <h2 class="title">Parts Queue</h2>
+  <div class="grid">
+   <input id="plannerSearch" placeholder="Search item, bike, category, part number, or notes" oninput="renderPartsQueue()">
+   <button class="primary" onclick="openPartsQueueEditor()">+ Add Item</button>
+  </div>
+  <div class="tabs">
+   <button id="pqActive" class="active" onclick="setPartsQueueFilter('active')">Active</button>
+   <button id="pqAll" onclick="setPartsQueueFilter('all')">All</button>
+   <button id="pqAcquired" onclick="setPartsQueueFilter('acquired')">Acquired</button>
+  </div>
+  <div id="partsQueueList"></div>
+ </div>
+</section>
+
 <section id="maintenanceView" class="hidden">
  <div class="card">
   <h2 class="title">Maintenance Manager</h2>
@@ -508,6 +536,41 @@ textarea{min-height:82px;resize:vertical}
 
 
 
+
+
+<div id="partsQueueModal" class="modal">
+ <div class="modal-box">
+  <button class="modal-close" onclick="closePartsQueueEditor()">Close</button>
+  <h2 id="partsQueueEditorTitle">Add Parts Queue Item</h2>
+  <input id="pqId" type="hidden">
+  <div class="grid">
+   <div><label>Item / Idea</label><input id="pqName" placeholder="Motion Pro chain alignment tool"></div>
+   <div><label>Category</label>
+    <select id="pqCategory">
+     <option>Tool</option>
+     <option>Motorcycle Part</option>
+     <option>Accessory</option>
+     <option>Shop Equipment</option>
+     <option>Consumable</option>
+     <option>Upgrade Idea</option>
+     <option>Other</option>
+    </select>
+   </div>
+   <div><label>Motorcycle</label><select id="pqBikeId"><option value="">General / Shop</option></select></div>
+   <div><label>Priority</label><select id="pqPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+   <div><label>Status</label><select id="pqStatus"><option>Considering</option><option>Researching</option><option>Planned</option><option>Ordered</option><option>Acquired</option></select></div>
+   <div><label>Estimated Cost</label><input id="pqCost" inputmode="decimal" placeholder="$0.00"></div>
+   <div><label>Part Number (optional)</label><input id="pqPartNumber"></div>
+   <div><label>Store / Source (optional)</label><input id="pqSource" placeholder="RevZilla, dealer, Marketplace..."></div>
+  </div>
+  <div style="margin-top:10px"><label>Why Consider It?</label><textarea id="pqReason" placeholder="What problem would this solve or why might it be useful?"></textarea></div>
+  <div style="margin-top:10px"><label>Research / Fitment Notes</label><textarea id="pqNotes" placeholder="Size, compatibility, preferred brand, links copied as text, questions to answer, etc."></textarea></div>
+  <div class="actions">
+   <button class="success" onclick="savePartsQueueItem()">Save Item</button>
+   <button id="deletePartsQueueButton" class="danger" onclick="deletePartsQueueItem()">Delete Item</button>
+  </div>
+ </div>
+</div>
 
 <div id="specsModal" class="modal">
  <div class="modal-box">
@@ -588,8 +651,8 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="6.1.1",DB_NAME="NightRivetMotoDB",DB_VERSION=5;
-let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all";
+const APP_VERSION="6.2.0",DB_NAME="NightRivetMotoDB",DB_VERSION=6;
+let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all",partsQueueFilter="active";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
 const inspectionGroups={
@@ -613,7 +676,7 @@ const templates={
 
 function today(){return new Date().toISOString().slice(0,10)}
 function itemId(s,i){return(s+"_"+i).toLowerCase().replace(/[^a-z0-9]+/g,"_")}
-function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("records"))d.createObjectStore("records",{keyPath:"id"});if(!d.objectStoreNames.contains("refs"))d.createObjectStore("refs",{keyPath:"id"});if(!d.objectStoreNames.contains("services"))d.createObjectStore("services",{keyPath:"id"});if(!d.objectStoreNames.contains("bikes"))d.createObjectStore("bikes",{keyPath:"id"});if(!d.objectStoreNames.contains("inventory"))d.createObjectStore("inventory",{keyPath:"id"});if(!d.objectStoreNames.contains("reminders"))d.createObjectStore("reminders",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>reject(r.error)})}
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("records"))d.createObjectStore("records",{keyPath:"id"});if(!d.objectStoreNames.contains("refs"))d.createObjectStore("refs",{keyPath:"id"});if(!d.objectStoreNames.contains("services"))d.createObjectStore("services",{keyPath:"id"});if(!d.objectStoreNames.contains("bikes"))d.createObjectStore("bikes",{keyPath:"id"});if(!d.objectStoreNames.contains("inventory"))d.createObjectStore("inventory",{keyPath:"id"});if(!d.objectStoreNames.contains("reminders"))d.createObjectStore("reminders",{keyPath:"id"});if(!d.objectStoreNames.contains("partsQueue"))d.createObjectStore("partsQueue",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>reject(r.error)})}
 function os(name,mode="readonly"){return db.transaction(name,mode).objectStore(name)}
 function all(name){return new Promise((res,rej)=>{const r=os(name).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
 function one(name,id){return new Promise((res,rej)=>{const r=os(name).get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
@@ -621,9 +684,9 @@ function put(name,val){return new Promise((res,rej)=>{const r=os(name,"readwrite
 function del(name,id){return new Promise((res,rej)=>{const r=os(name,"readwrite").delete(id);r.onsuccess=res;r.onerror=()=>rej(r.error)})}
 
 function showView(name){
- ["garage","profile","inspection","service","history","gallery","inventory","maintenance"].forEach(v=>document.getElementById(v+"View").classList.toggle("hidden",v!==name));
- ["Garage","Inspection","Service","History","Gallery","Inventory","Maintenance"].forEach(v=>document.getElementById("nav"+v).classList.toggle("active",v.toLowerCase()===name));
- if(name==="garage")renderGarage();if(name==="history")renderHistory();if(name==="gallery")renderGallery();if(name==="inventory")renderInventory();if(name==="maintenance")renderMaintenance();
+ ["garage","profile","inspection","service","history","gallery","inventory","maintenance","planner"].forEach(v=>document.getElementById(v+"View").classList.toggle("hidden",v!==name));
+ ["Garage","Inspection","Service","History","Gallery","Inventory","Maintenance","Planner"].forEach(v=>document.getElementById("nav"+v).classList.toggle("active",v.toLowerCase()===name));
+ if(name==="garage")renderGarage();if(name==="history")renderHistory();if(name==="gallery")renderGallery();if(name==="inventory")renderInventory();if(name==="maintenance")renderMaintenance();if(name==="planner")renderPartsQueue();
  scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -960,6 +1023,65 @@ async function saveStockSpecs(){
  alert("Stock specifications saved.");
 }
 
+
+async function populatePartsQueueBikeOptions(selected=""){
+ const bikes=await all("bikes");
+ pqBikeId.innerHTML='<option value="">General / Shop</option>'+bikes
+  .sort((a,b)=>(a.year+a.make+a.model).localeCompare(b.year+b.make+b.model))
+  .map(b=>`<option value="${b.id}">${b.year} ${b.make} ${b.model}</option>`).join("");
+ pqBikeId.value=selected||"";
+}
+function setPartsQueueFilter(filter){
+ partsQueueFilter=filter;
+ ["Active","All","Acquired"].forEach(x=>document.getElementById("pq"+x).classList.toggle("active",x.toLowerCase()===filter));
+ renderPartsQueue();
+}
+function priorityClass(priority){
+ return priority==="High"?"priority-high":priority==="Low"?"priority-low":"priority-medium";
+}
+async function renderPartsQueue(){
+ const q=(plannerSearch.value||"").toLowerCase(),bikes=await all("bikes");
+ const bikeMap=Object.fromEntries(bikes.map(b=>[b.id,b]));
+ let items=(await all("partsQueue")).sort((a,b)=>(b.updatedAt||b.createdAt||"").localeCompare(a.updatedAt||a.createdAt||""));
+ if(partsQueueFilter==="active")items=items.filter(x=>x.status!=="Acquired");
+ if(partsQueueFilter==="acquired")items=items.filter(x=>x.status==="Acquired");
+ items=items.filter(x=>JSON.stringify({...x,bike:bikeMap[x.bikeId]}).toLowerCase().includes(q));
+ if(!items.length){partsQueueList.innerHTML="<div class='small' style='margin-top:12px'>No matching items.</div>";return}
+ partsQueueList.innerHTML=items.map(x=>{
+  const b=bikeMap[x.bikeId],bikeLabel=b?`${b.year} ${b.make} ${b.model}`:"General / Shop";
+  return `<div class="queue-card card-enter"><div class="queue-head"><div><div class="queue-name">${x.name}</div><div class="queue-meta">${x.category} • ${bikeLabel}${x.partNumber?` • Part: ${x.partNumber}`:""}</div><div class="queue-cost">${x.cost||"Cost not entered"}</div></div><div><div class="queue-status">${x.status}</div><div class="${priorityClass(x.priority)}" style="font-size:11px;font-weight:900;text-align:right;margin-top:6px">${x.priority} Priority</div></div></div>${x.reason?`<div class="queue-notes"><b>Reason:</b> ${x.reason}</div>`:""}${x.notes?`<div class="queue-notes"><b>Notes:</b> ${x.notes}</div>`:""}${x.source?`<div class="small" style="margin-top:8px"><b>Source:</b> ${x.source}</div>`:""}<div class="actions"><button class="blue" onclick="openPartsQueueEditor('${x.id}')">Edit</button>${x.status!=="Acquired"?`<button class="success" onclick="markPartsQueueAcquired('${x.id}')">Mark Acquired</button>`:""}</div></div>`;
+ }).join("");
+}
+async function openPartsQueueEditor(id=null){
+ partsQueueModal.classList.add("open");
+ pqId.value="";pqName.value="";pqCategory.value="Tool";pqPriority.value="Medium";pqStatus.value="Considering";
+ pqCost.value="";pqPartNumber.value="";pqSource.value="";pqReason.value="";pqNotes.value="";
+ deletePartsQueueButton.style.display=id?"block":"none";
+ partsQueueEditorTitle.textContent=id?"Edit Parts Queue Item":"Add Parts Queue Item";
+ await populatePartsQueueBikeOptions("");
+ if(id){
+  const x=await one("partsQueue",id);if(!x)return;
+  pqId.value=x.id;pqName.value=x.name||"";pqCategory.value=x.category||"Other";pqBikeId.value=x.bikeId||"";
+  pqPriority.value=x.priority||"Medium";pqStatus.value=x.status||"Considering";pqCost.value=x.cost||"";
+  pqPartNumber.value=x.partNumber||"";pqSource.value=x.source||"";pqReason.value=x.reason||"";pqNotes.value=x.notes||"";
+ }
+}
+function closePartsQueueEditor(){partsQueueModal.classList.remove("open")}
+async function savePartsQueueItem(){
+ if(!pqName.value.trim()){alert("Enter an item or idea.");return}
+ const id=pqId.value||("pq_"+Date.now()),old=pqId.value?await one("partsQueue",id):null;
+ await put("partsQueue",{id,name:pqName.value.trim(),category:pqCategory.value,bikeId:pqBikeId.value,priority:pqPriority.value,status:pqStatus.value,cost:pqCost.value.trim(),partNumber:pqPartNumber.value.trim(),source:pqSource.value.trim(),reason:pqReason.value.trim(),notes:pqNotes.value.trim(),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()});
+ closePartsQueueEditor();renderPartsQueue();
+}
+async function deletePartsQueueItem(){
+ const id=pqId.value;if(id&&confirm("Delete this Parts Queue item?")){await del("partsQueue",id);closePartsQueueEditor();renderPartsQueue()}
+}
+async function markPartsQueueAcquired(id){
+ const x=await one("partsQueue",id);if(!x)return;
+ x.status="Acquired";x.acquiredAt=new Date().toISOString();x.updatedAt=new Date().toISOString();
+ await put("partsQueue",x);renderPartsQueue();
+}
+
 function monthsAfter(dateStr,months){if(!dateStr||!months)return "";const d=new Date(dateStr+"T12:00:00");d.setMonth(d.getMonth()+Number(months));return d.toISOString().slice(0,10)}
 function daysBetween(a,b){return Math.floor((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/(24*60*60*1000))}
 function reminderState(r,currentMileage){const mi=Number(r.mileageInterval||0),mo=Number(r.monthInterval||0),last=Number(r.lastMileage||0),cur=Number(currentMileage||0);let mileageRemaining=null,dateRemaining=null,nextMileage=null,nextDate="";if(mi>0&&r.lastMileage!==""){nextMileage=last+mi;mileageRemaining=nextMileage-cur}if(mo>0&&r.lastDate){nextDate=monthsAfter(r.lastDate,mo);dateRemaining=daysBetween(today(),nextDate)}let overdue=false,dueSoon=false;if(mileageRemaining!==null){if(mileageRemaining<0)overdue=true;else if(mileageRemaining<=Math.max(100,mi*.15))dueSoon=true}if(dateRemaining!==null){if(dateRemaining<0)overdue=true;else if(dateRemaining<=30)dueSoon=true}let label="Not Started",cls="reminder-neutral";if(overdue){label="OVERDUE";cls="reminder-overdue"}else if(dueSoon){label="DUE SOON";cls="reminder-due"}else if(mileageRemaining!==null||dateRemaining!==null){label="ON TRACK";cls="reminder-ok"}return{mileageRemaining,dateRemaining,nextMileage,nextDate,label,cls,overdue,dueSoon}}
@@ -1057,8 +1179,8 @@ async function applyInventoryUsage(newUsage,oldUsage={}){
  }
 }
 
-async function exportBackup(){const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs"),inventory:await all("inventory"),reminders:await all("reminders")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[],v=p.inventory||[],m=p.reminders||[];if(!confirm(`Import ${b.length} motorcycles, ${i.length} inspections, ${s.length} services, ${r.length} reference photos, ${v.length} inventory items, and ${m.length} reminders?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);for(const x of v)await put("inventory",x);for(const x of m)await put("reminders",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid NightRivet backup.")}e.target.value=""}
+async function exportBackup(){const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs"),inventory:await all("inventory"),reminders:await all("reminders"),partsQueue:await all("partsQueue")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[],v=p.inventory||[],m=p.reminders||[],q=p.partsQueue||[];if(!confirm(`Import ${b.length} motorcycles, ${i.length} inspections, ${s.length} services, ${r.length} reference photos, ${v.length} inventory items, ${m.length} reminders, and ${q.length} Parts Queue items?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);for(const x of v)await put("inventory",x);for(const x of m)await put("reminders",x);for(const x of q)await put("partsQueue",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid NightRivet backup.")}e.target.value=""}
 
 async function migrateUnlinkedRecords(){
  const bikes=await all("bikes"),z=bikes.find(b=>b.id==="z500"),v=bikes.find(b=>b.id==="vulcan");
