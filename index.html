@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08080a">
-<meta name="description" content="NightRivet Moto vehicle profiles, inspections, service history, repair documentation, and workshop journal.">
+<meta name="description" content="Machine Asylum vehicle profiles, inspections, service history, repair documentation, and mechanical treatment records.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>NightRivet Moto</title>
+<title>Machine Asylum</title>
 <style>
 :root{
  --bg:#08080a;--panel:#151519;--panel2:#1d1d23;--line:#36363f;--text:#f3f3f5;
@@ -21,7 +21,7 @@ button,input,textarea,select{font:inherit}
 .app{max-width:1040px;margin:auto;padding:14px 14px 76px}
 .hero{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid #3c3c45;border-radius:22px;background:linear-gradient(145deg,#1d1d23,#0a0a0d);box-shadow:0 18px 38px #0009}
 .hero img{width:70px;height:70px;border-radius:17px}.hero h1{margin:0;font-size:27px}.tag{color:var(--muted);margin-top:5px}
-.blacksmith-header{
+.asylum-header{
  min-height:176px;
  display:grid;
  grid-template-columns:92px minmax(0,1fr) auto;
@@ -39,7 +39,7 @@ button,input,textarea,select{font:inherit}
  overflow:hidden;
  position:relative;
 }
-.blacksmith-header:before{
+.asylum-header:before{
  content:"";
  position:absolute;inset:0;
  background:
@@ -48,7 +48,7 @@ button,input,textarea,select{font:inherit}
  opacity:.24;
  pointer-events:none;
 }
-.blacksmith-header:after{
+.asylum-header:after{
  content:"";
  position:absolute;
  left:0;right:0;bottom:0;height:3px;
@@ -139,7 +139,7 @@ button,input,textarea,select{font:inherit}
 }
 .bolt-a{left:10px;top:10px}.bolt-b{right:10px;bottom:10px}
 @media(max-width:760px){
- .blacksmith-header{
+ .asylum-header{
   grid-template-columns:78px minmax(0,1fr);
   gap:14px;
   padding:18px 16px 17px;
@@ -147,11 +147,29 @@ button,input,textarea,select{font:inherit}
  }
  .header-logo-wrap img{width:74px;height:74px;border-radius:18px}
  .header-kicker{font-size:25px}
- .header-subtitle{font-size:13px;letter-spacing:.14em}
+ .header-subtitle{font-size:12px;letter-spacing:.11em}
  .header-tagline{font-size:12px;margin-top:9px}
  .header-status{font-size:10px;padding:6px 8px;margin-top:9px}
  .header-copy{padding-right:70px}
 }
+
+.asylum-header .header-kicker{
+ font-family:Georgia,"Times New Roman",serif;
+ font-weight:900;
+ letter-spacing:.045em;
+ text-transform:uppercase;
+}
+.asylum-header .header-subtitle{
+ color:#d01a2a;
+ text-shadow:0 0 12px #a8122030;
+}
+.asylum-header .header-tagline{
+ text-transform:uppercase;
+ letter-spacing:.075em;
+}
+.title{position:relative}
+.title:after{content:"";position:absolute;left:13px;right:0;bottom:-7px;height:1px;background:linear-gradient(90deg,#a81220,#a8122000);opacity:.65}
+.nav button{letter-spacing:.01em}
 .nav{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:12px 0}
 button{border:1px solid #3a3a43;border-radius:13px;padding:12px 10px;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(180deg,#303038,#25252c);cursor:pointer;box-shadow:0 5px 13px #0005;transition:transform .14s ease,filter .14s ease}button:active{transform:scale(.985);filter:brightness(.92)}
 button.active,.primary{background:var(--red)}button.success{background:var(--green)}button.warn{background:var(--amber)}button.danger{background:var(--danger)}button.blue{background:var(--blue)}
@@ -270,7 +288,7 @@ textarea{min-height:82px;resize:vertical}
 </head>
 <body>
 <div class="app">
-<header class="hero blacksmith-header">
+<header class="hero asylum-header">
  <div class="header-rotor" aria-hidden="true"></div>
  <div class="header-grid" aria-hidden="true"></div>
  <div class="header-bolt bolt-a" aria-hidden="true"></div>
@@ -278,14 +296,14 @@ textarea{min-height:82px;resize:vertical}
 
  <div class="header-logo-wrap">
   <div class="header-logo-glow"></div>
-  <img src="icon-192.png" alt="NightRivet Moto">
+  <img src="icon-192.png" alt="Machine Asylum">
  </div>
 
  <div class="header-copy">
-  <div class="header-kicker">NIGHTRIVET</div>
-  <div class="header-subtitle">Moto Workshop</div>
-  <div class="header-tagline">Every vehicle. Every job.<br>One complete history.</div>
-  <div id="headerWorkshopStatus" class="header-status">Loading workshop status…</div>
+  <div class="header-kicker">MACHINE ASYLUM</div>
+  <div class="header-subtitle">Mechanical Treatment Facility</div>
+  <div class="header-tagline">Motorcycles. Automotive. Diesel.<br>One complete history.</div>
+  <div id="headerWorkshopStatus" class="header-status">Checking facility status…</div>
  </div>
 </header>
 
@@ -302,8 +320,8 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="garageView">
  <div class="card card-enter">
-  <div class="section-kicker">Workshop Overview</div>
-  <h2 class="title">Garage Dashboard</h2>
+  <div class="section-kicker">Facility Overview</div>
+  <h2 class="title">Facility Dashboard</h2>
   <div class="dashboard-grid">
    <div class="dashboard-tile"><b id="dashBikeCount">0</b><span>Vehicles</span></div>
    <div class="dashboard-tile"><b id="dashDueCount">0</b><span>Due / Overdue</span></div>
@@ -320,7 +338,7 @@ textarea{min-height:82px;resize:vertical}
   </div>
   <div id="garageList"></div>
  </div>
- <div class="notice">Motorcycles, cars, trucks, ATVs/UTVs, and customer vehicles all use the same workshop history system.</div>
+ <div class="notice">Motorcycles, cars, trucks, ATVs/UTVs, and customer vehicles all receive the same complete treatment history.</div>
 </section>
 
 <section id="profileView" class="hidden">
@@ -364,7 +382,7 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="inspectionView" class="hidden">
  <div class="card">
-  <h2 class="title">Inspection Information</h2>
+  <h2 class="title">Inspection Intake</h2>
   <div class="grid">
    <div><label>Vehicle</label><select id="iBikeId" onchange="changeInspectionVehicle()"></select></div>
    <div><label>Date</label><input id="iDate" type="date"></div>
@@ -379,7 +397,7 @@ textarea{min-height:82px;resize:vertical}
   <h2 class="title">Inspection Result</h2>
   <div class="grid">
    <div><label>Overall Condition</label><select id="iOverall"><option>Ready for Use</option><option>Service Recommended</option><option>Repair Before Use</option><option value="Ride Ready">Ride Ready (legacy)</option><option value="Repair Before Riding">Repair Before Riding (legacy)</option></select></div>
-   <div><label>Ride Score</label><input id="iScore" type="number" min="0" max="100"></div>
+   <div><label>Condition Score</label><input id="iScore" type="number" min="0" max="100"></div>
   </div>
   <div style="margin-top:10px"><label>Recommendations / Findings</label><textarea id="iRecommendations"></textarea></div>
   <div style="margin-top:10px"><label>Next Service Due</label><input id="iNext"></div>
@@ -389,7 +407,7 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="serviceView" class="hidden">
  <div class="card">
-  <h2 class="title">Service Record</h2>
+  <h2 class="title">Treatment Record</h2>
   <div class="grid">
    <div><label>Vehicle</label><select id="sBikeId"></select></div>
    <div><label>Date</label><input id="sDate" type="date"></div>
@@ -440,7 +458,7 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="historyView" class="hidden">
  <div class="card">
-  <h2 class="title">Complete History</h2>
+  <h2 class="title">Complete Treatment History</h2>
   <div class="tabs"><button id="filterAll" class="active" onclick="setHistoryFilter('all')">All</button><button id="filterInspection" onclick="setHistoryFilter('inspection')">Inspections</button><button id="filterService" onclick="setHistoryFilter('service')">Services</button></div>
   <input id="historySearch" class="search" placeholder="Search vehicle, service, finding, part, or lesson" oninput="renderHistory()">
   <div id="historyList"></div>
@@ -449,7 +467,7 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="galleryView" class="hidden">
  <div class="card">
-  <h2 class="title">Reference Gallery</h2>
+  <h2 class="title">Reference Archive</h2>
   <div class="grid">
    <div><label>Category</label><select id="gCategory"><option>Chain</option><option>Sprocket</option><option>Tire</option><option>Brake</option><option>Leak</option><option>Electrical</option><option>Tool / Setup</option><option>Other</option></select></div>
    <div><label>Title</label><input id="gTitle"></div>
@@ -468,7 +486,7 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="plannerView" class="hidden">
  <div class="card card-enter">
-  <div class="section-kicker">Future Purchases & Ideas</div>
+  <div class="section-kicker">Facility Planning</div>
   <h2 class="title">Parts Queue</h2>
   <div class="grid">
    <input id="plannerSearch" placeholder="Search item, vehicle, category, part number, or notes" oninput="renderPartsQueue()">
@@ -485,7 +503,7 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="maintenanceView" class="hidden">
  <div class="card">
-  <h2 class="title">Maintenance Manager</h2>
+  <h2 class="title">Maintenance & Treatment</h2>
   <div class="grid">
    <div><label>Vehicle</label><select id="mBikeId" onchange="renderMaintenance()"></select></div>
    <div><label>Current Mileage</label><input id="mCurrentMileage" type="number" min="0" step="1" onchange="updateMaintenanceMileage()"></div>
@@ -497,7 +515,7 @@ textarea{min-height:82px;resize:vertical}
 
 <section id="inventoryView" class="hidden">
  <div class="card">
-  <h2 class="title">Consumables Inventory</h2>
+  <h2 class="title">Treatment Inventory</h2>
   <div class="grid">
    <input id="inventorySearch" placeholder="Search inventory" oninput="renderInventory()">
    <button class="primary" onclick="openInventoryEditor()">+ Add Inventory Item</button>
@@ -534,7 +552,7 @@ textarea{min-height:82px;resize:vertical}
    <div><label>VIN (optional)</label><input id="bVin"></div>
   </div>
   <div style="margin-top:10px"><label>Current Goal / Next Task</label><textarea id="bGoal"></textarea></div>
-  <div class="actions"><button class="success" onclick="saveBike()">Save Vehicle</button><button class="danger" id="deleteBikeButton" onclick="deleteBike()">Delete Motorcycle</button></div>
+  <div class="actions"><button class="success" onclick="saveBike()">Save Vehicle</button><button class="danger" id="deleteBikeButton" onclick="deleteBike()">Delete Vehicle</button></div>
  </div>
 </div>
 
@@ -580,7 +598,7 @@ textarea{min-height:82px;resize:vertical}
  <div class="modal-box">
   <button class="modal-close" onclick="closeSpecsEditor()">Close</button>
   <h2>Stock Specifications</h2>
-  <div class="small" style="margin-bottom:12px">Enter the factory-reference information you want available without leaving NightRivet.</div>
+  <div class="small" style="margin-bottom:12px">Enter the factory-reference information you want available without leaving Machine Asylum.</div>
 
   <h3 class="inventory-category">Tires</h3>
   <div class="grid">
@@ -662,7 +680,7 @@ textarea{min-height:82px;resize:vertical}
 </div>
 
 <script>
-const APP_VERSION="7.0.0",DB_NAME="NightRivetMotoDB",DB_VERSION=6;
+const APP_VERSION="8.0.0",DB_NAME="NightRivetMotoDB",DB_VERSION=6;
 let db,currentBikeId=null,currentInspectionId=null,currentServiceId=null,historyFilter="all",inventoryFilter="all",partsQueueFilter="active",inventoryEditorPhoto="";
 let inspectionPhotos={},servicePhotos={before:[],after:[]};
 
@@ -801,9 +819,9 @@ async function renderHeaderWorkshopStatus(){
   if(!latestInspections[r.bikeId])latestInspections[r.bikeId]=r;
  }
  const attention=Object.values(latestInspections).filter(r=>r.overall==="Repair Before Riding").length;
- let text="● Workshop ready";
+ let text="● Facility operational";
  let cls="status-good";
- if(attention>0){text=`● ${attention} motorcycle${attention===1?"":"s"} require attention`;cls="status-bad"}
+ if(attention>0){text=`● ${attention} vehicle${attention===1?"":"s"} require attention`;cls="status-bad"}
  else if(overdue>0){text=`● ${overdue} maintenance item${overdue===1?"":"s"} overdue`;cls="status-bad"}
  else if(dueSoon>0){text=`● ${dueSoon} maintenance item${dueSoon===1?"":"s"} due soon`;cls="status-warn"}
  else if(low>0){text=`● ${low} inventory item${low===1?"":"s"} low`;cls="status-warn"}
@@ -822,9 +840,9 @@ async function renderGarageDashboard(){
  dashLowStock.textContent=inv.filter(x=>Number(x.qty||0)<=Number(x.lowAt||0)).length;
  dashRecordCount.textContent=ins.length+svc.length;
  const activity=[...ins.map(x=>({...x,kind:"inspection"})),...svc.map(x=>({...x,kind:"service"}))].sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
- if(!activity.length){dashRecent.textContent="No workshop activity recorded yet.";return}
+ if(!activity.length){dashRecent.textContent="No facility activity recorded yet.";return}
  const latest=activity[0],bike=bikes.find(x=>x.id===latest.bikeId);
- dashRecent.innerHTML=`<b>Recent activity:</b> ${latest.kind==="service"?(latest.serviceType||"Service"):(latest.purpose||"Inspection")} • ${bike?`${bike.year} ${bike.make} ${bike.model}`:"Unlinked vehicle"} • ${latest.date||""}`;
+ dashRecent.innerHTML=`<b>Recent facility activity:</b> ${latest.kind==="service"?(latest.serviceType||"Service"):(latest.purpose||"Inspection")} • ${bike?`${bike.year} ${bike.make} ${bike.model}`:"Unlinked vehicle"} • ${latest.date||""}`;
 }
 function recordPhotoCount(r){
  if(r.kind==="service")return (r.beforePhotos?.length||0)+(r.afterPhotos?.length||0);
@@ -888,7 +906,7 @@ async function renderGarage(){
  await renderGarageDashboard();
  const list=garageList,q=(garageSearch.value||"").toLowerCase();let bikes=await all("bikes");
  bikes=bikes.filter(b=>JSON.stringify(b).toLowerCase().includes(q)).sort((a,b)=>(a.ownership+b.year).localeCompare(b.ownership+a.year));
- if(!bikes.length){list.innerHTML="<div class='small' style='margin-top:12px'>No matching vehicles.</div>";return}
+ if(!bikes.length){list.innerHTML="<div class='small' style='margin-top:12px'>No matching vehicles in the facility.</div>";return}
  const inspections=await all("records"),services=await all("services"),reminders=await all("reminders");
  list.innerHTML=bikes.map(b=>{
   const bs=services.filter(x=>x.bikeId===b.id).sort((a,c)=>(c.updatedAt||"").localeCompare(a.updatedAt||""));
@@ -983,7 +1001,7 @@ function closePhotoModal(e){if(e.target===photoModal)forceClosePhotoModal()}func
 async function saveInspection(){
  const bike=await one("bikes",iBikeId.value);const rec={id:currentInspectionId||Date.now(),bikeId:iBikeId.value,kind:"inspection",version:APP_VERSION,date:iDate.value,technician:iTech.value,owner:iOwner.value,mileage:iMileage.value,purpose:iPurpose.value,overall:iOverall.value,score:iScore.value,recommendations:iRecommendations.value,nextService:iNext.value,checks:{},updatedAt:new Date().toISOString()};
  Object.entries(activeInspectionGroups).forEach(([g,items])=>items.forEach(item=>{const id=itemId(g,item),sel=document.querySelector(`input[name="${id}"]:checked`);rec.checks[id]={group:g,label:item,status:sel?sel.value:"",note:document.getElementById(id+"_note").value,photos:inspectionPhotos[id]||[]}}));
- await put("records",rec);await syncBikeMileage(rec.bikeId,iMileage.value);currentInspectionId=rec.id;alert("Inspection saved. Vehicle mileage synchronized.");openProfile(rec.bikeId)
+ await put("records",rec);await syncBikeMileage(rec.bikeId,iMileage.value);currentInspectionId=rec.id;alert("Inspection filed. Vehicle mileage synchronized.");openProfile(rec.bikeId)
 }
 async function saveService(){
  const bike=await one("bikes",sBikeId.value),old=currentServiceId?await one("services",currentServiceId):null,usage=collectInventoryUsage();
@@ -994,7 +1012,7 @@ async function saveService(){
   alert(err.message||"Inventory could not be updated.");
   return;
  }
- await put("services",rec);await syncBikeMileage(rec.bikeId,sMileage.value);currentServiceId=rec.id;const activeReminderId=sessionStorage.getItem("activeReminderId");if(activeReminderId){await completeReminder(activeReminderId,sMileage.value||bike?.mileage||"",sDate.value||today());sessionStorage.removeItem("activeReminderId")}alert("Service record saved and inventory updated.");openProfile(rec.bikeId)
+ await put("services",rec);await syncBikeMileage(rec.bikeId,sMileage.value);currentServiceId=rec.id;const activeReminderId=sessionStorage.getItem("activeReminderId");if(activeReminderId){await completeReminder(activeReminderId,sMileage.value||bike?.mileage||"",sDate.value||today());sessionStorage.removeItem("activeReminderId")}alert("Treatment record filed and inventory updated.");openProfile(rec.bikeId)
 }
 
 function setHistoryFilter(f){historyFilter=f;["All","Inspection","Service"].forEach(x=>document.getElementById("filter"+x).classList.toggle("active",x.toLowerCase()===f));renderHistory()}
@@ -1259,8 +1277,8 @@ async function applyInventoryUsage(newUsage,oldUsage={}){
  }
 }
 
-async function exportBackup(){const payload={app:"NightRivet Moto",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs"),inventory:await all("inventory"),reminders:await all("reminders"),partsQueue:await all("partsQueue")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`NightRivet_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[],v=p.inventory||[],m=p.reminders||[],q=p.partsQueue||[];if(!confirm(`Import ${b.length} vehicles, ${i.length} inspections, ${s.length} services, ${r.length} reference photos, ${v.length} inventory items, ${m.length} reminders, and ${q.length} Parts Queue items?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);for(const x of v)await put("inventory",x);for(const x of m)await put("reminders",x);for(const x of q)await put("partsQueue",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid NightRivet backup.")}e.target.value=""}
+async function exportBackup(){const payload={app:"Machine Asylum",version:APP_VERSION,exportedAt:new Date().toISOString(),bikes:await all("bikes"),inspections:await all("records"),services:await all("services"),references:await all("refs"),inventory:await all("inventory"),reminders:await all("reminders"),partsQueue:await all("partsQueue")};const blob=new Blob([JSON.stringify(payload)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`Machine_Asylum_Backup_${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function importBackup(e){const f=e.target.files[0];if(!f)return;try{const p=JSON.parse(await f.text()),b=p.bikes||[],i=p.inspections||p.records||[],s=p.services||[],r=p.references||[],v=p.inventory||[],m=p.reminders||[],q=p.partsQueue||[];if(!confirm(`Import ${b.length} vehicles, ${i.length} inspections, ${s.length} services, ${r.length} reference photos, ${v.length} inventory items, ${m.length} reminders, and ${q.length} Parts Queue items?`))return;for(const x of b)await put("bikes",x);for(const x of i)await put("records",x);for(const x of s)await put("services",x);for(const x of r)await put("refs",x);for(const x of v)await put("inventory",x);for(const x of m)await put("reminders",x);for(const x of q)await put("partsQueue",x);await bikeOptions();alert("Backup imported.");showView("garage")}catch(err){alert("That is not a valid Machine Asylum backup.")}e.target.value=""}
 
 async function migrateUnlinkedRecords(){
  const bikes=await all("bikes"),z=bikes.find(b=>b.id==="z500"),v=bikes.find(b=>b.id==="vulcan");

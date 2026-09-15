@@ -1,7 +1,7 @@
 {
-  "name": "NightRivet Moto",
-  "short_name": "NightRivet",
-  "description": "NightRivet Moto multi-vehicle workshop companion for motorcycles, cars, trucks, service history, inspections, reminders, inventory, specifications, and Parts Queue.",
+  "name": "Machine Asylum",
+  "short_name": "Machine Asylum",
+  "description": "Machine Asylum multi-vehicle mechanical treatment facility for motorcycles, cars, trucks, service history, inspections, reminders, inventory, specifications, and Parts Queue.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
